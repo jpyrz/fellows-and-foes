@@ -1,0 +1,60 @@
+.shell {
+  min-height: 100dvh;
+  color: var(--ff-text);
+  background:
+    radial-gradient(
+      circle at 30% 10%,
+      color-mix(in srgb, var(--ff-accent) 15%, transparent),
+      transparent 38rem
+    ),
+    var(--ff-bg-root);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
+}
+
+.gameFrame {
+  display: grid;
+  width: 100%;
+  max-width: 90rem;
+  min-height: 100dvh;
+  margin: 0 auto;
+  grid-template-areas:
+    'top top'
+    'hud hud'
+    'battle commands';
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--ff-bg-root) 45%, transparent),
+      color-mix(in srgb, var(--ff-bg-root) 90%, transparent)
+    ),
+    repeating-linear-gradient(
+      125deg,
+      transparent 0,
+      transparent 30px,
+      color-mix(in srgb, var(--ff-text) 1.5%, transparent) 31px,
+      transparent 32px
+    ),
+    var(--ff-bg-frame);
+}
+
+@media (max-width: 60rem) {
+  .gameFrame {
+    grid-template-areas:
+      'top'
+      'hud'
+      'battle'
+      'commands';
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto minmax(17rem, 1fr) auto;
+  }
+}
+
+@media (max-height: 48rem) and (max-width: 60rem) {
+  .gameFrame {
+    grid-template-rows: auto auto minmax(16.5rem, 1fr) auto;
+  }
+}

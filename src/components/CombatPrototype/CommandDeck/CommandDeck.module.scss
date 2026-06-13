@@ -1,0 +1,81 @@
+.commandDeck {
+  grid-area: commands;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border-left: 1px solid var(--ff-border-strong);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      color-mix(in srgb, var(--ff-accent) 8%, transparent),
+      transparent 15rem
+    ),
+    linear-gradient(
+      180deg,
+      var(--ff-bg-command-start),
+      var(--ff-bg-command-end)
+    );
+  box-shadow: -1rem 0 2rem
+    color-mix(in srgb, var(--ff-shadow) 22%, transparent);
+}
+
+.commandHeader {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.activePortrait {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  color: var(--ff-on-accent);
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  font-weight: 900;
+  place-items: center;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.55rem 0.55rem 0.55rem 0.15rem;
+  background: var(--ff-accent);
+}
+
+.commandTitle {
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.activeStamina {
+  display: grid;
+  min-width: 3.25rem;
+  text-align: center;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--ff-stamina) 28%, transparent);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--ff-stamina) 8%, transparent);
+}
+
+.resultMenu {
+  display: flex;
+  min-height: 13.5rem;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (max-width: 60rem) {
+  .commandDeck {
+    min-height: 14.5rem;
+    padding: 0.75rem 0.9rem calc(0.9rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--ff-border-strong);
+    border-left: 0;
+    box-shadow: 0 -1rem 2rem
+      color-mix(in srgb, var(--ff-shadow) 35%, transparent);
+  }
+}
+
+@media (max-height: 48rem) and (max-width: 60rem) {
+  .commandDeck {
+    min-height: 14rem;
+  }
+}

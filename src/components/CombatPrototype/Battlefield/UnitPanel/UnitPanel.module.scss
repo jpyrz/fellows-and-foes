@@ -1,0 +1,166 @@
+.unit {
+  display: flex;
+  min-width: 0;
+  min-height: 5rem;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.55rem;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ff-text) 3%, transparent),
+      transparent
+    ),
+    color-mix(in srgb, var(--ff-bg-root) 78%, transparent);
+  transition:
+    border-color 150ms ease,
+    opacity 150ms ease,
+    transform 150ms ease;
+
+  &[data-active] {
+    border-color: var(--ff-border-strong);
+    box-shadow:
+      inset 3px 0 var(--ff-accent),
+      0 0 1rem color-mix(in srgb, var(--ff-accent) 8%, transparent);
+    transform: translateX(2px);
+  }
+
+  &[data-downed] {
+    opacity: 0.38;
+    filter: grayscale(0.8);
+  }
+
+  &[data-layout='party'] {
+    display: grid;
+    min-height: 7.5rem;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: 0.75rem;
+    text-align: center;
+
+    .portrait {
+      width: 2.7rem;
+      height: 2.7rem;
+      font-size: 1.1rem;
+    }
+
+    .unitDetails {
+      width: 100%;
+    }
+
+    .unitTitle {
+      display: none;
+    }
+
+    .staminaPips {
+      justify-content: center;
+
+      > span {
+        display: none;
+      }
+    }
+  }
+}
+
+.portrait {
+  position: relative;
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  color: var(--ff-text);
+  font-family: Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  place-items: center;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.55rem 0.55rem 0.55rem 0.15rem;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--ff-text) 15%, transparent),
+      transparent 60%
+    ),
+    var(--ff-portrait);
+}
+
+.turnMarker {
+  position: absolute;
+  right: -0.25rem;
+  bottom: -0.25rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid var(--ff-bg-panel);
+  border-radius: 50%;
+  background: var(--ff-accent);
+  box-shadow: 0 0 0.5rem
+    color-mix(in srgb, var(--ff-accent) 60%, transparent);
+}
+
+.unitDetails,
+.unitName {
+  min-width: 0;
+  flex: 1;
+}
+
+.healthBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+.staminaPips {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 0.35rem;
+
+  > i {
+    width: 0.45rem;
+    height: 3px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--ff-text-muted) 30%, transparent);
+
+    &[data-filled] {
+      background: var(--ff-stamina);
+    }
+  }
+
+  > span {
+    margin-left: auto;
+    color: var(--ff-text-muted);
+    font-size: 0.6rem;
+    font-weight: 800;
+  }
+}
+
+@media (max-width: 60rem) {
+  .unit {
+    min-height: 4.6rem;
+    gap: 0.45rem;
+    padding: 0.45rem;
+
+    &[data-layout='party'] {
+      min-height: 5.2rem;
+      gap: 0.15rem;
+      padding: 0.3rem;
+
+      .portrait {
+        width: 1.9rem;
+        height: 1.9rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .portrait {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.1rem;
+  }
+}

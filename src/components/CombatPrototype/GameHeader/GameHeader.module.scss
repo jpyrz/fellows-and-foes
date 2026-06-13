@@ -1,0 +1,46 @@
+.topBar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.5rem;
+  padding: 0.8rem clamp(1rem, 3vw, 2rem);
+  border-bottom: 1px solid var(--ff-border);
+  background: color-mix(in srgb, var(--ff-bg-header) 88%, transparent);
+}
+
+.mark {
+  display: grid;
+  width: 2.3rem;
+  height: 1.85rem;
+  color: var(--ff-on-accent);
+  font-family: Georgia, serif;
+  font-size: 0.65rem;
+  font-weight: 900;
+  place-items: center;
+  border-radius: 0.4rem 0.4rem 0.4rem 0.1rem;
+  background: var(--ff-accent);
+  transform: rotate(-3deg);
+}
+
+.location {
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.themeOption {
+  border-left: 2px solid transparent;
+
+  &[data-active] {
+    border-left-color: var(--ff-accent);
+    background: color-mix(in srgb, var(--ff-accent) 10%, transparent);
+  }
+}
+
+@media (max-width: 30rem) {
+  .topBar {
+    padding-inline: 0.9rem;
+  }
+}

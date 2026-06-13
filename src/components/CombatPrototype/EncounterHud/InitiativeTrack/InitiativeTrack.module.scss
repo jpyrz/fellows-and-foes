@@ -1,0 +1,46 @@
+.initiative {
+  display: flex;
+  align-items: center;
+  margin-top: 0.65rem;
+}
+
+.initiativeUnit {
+  display: flex;
+  align-items: center;
+  opacity: 0.55;
+
+  > span {
+    display: grid;
+    width: 1.45rem;
+    height: 1.45rem;
+    color: var(--ff-text);
+    font-size: 0.6rem;
+    font-weight: 900;
+    place-items: center;
+    border: 1px solid var(--ff-border);
+    border-radius: 50%;
+    background: var(--ff-surface-strong);
+  }
+
+  > i {
+    width: 0.65rem;
+    height: 1px;
+    background: var(--ff-border);
+  }
+
+  &[data-active] {
+    opacity: 1;
+
+    > span {
+      color: var(--ff-on-accent);
+      border-color: var(--ff-accent);
+      background: var(--ff-accent);
+      box-shadow: 0 0 0.8rem
+        color-mix(in srgb, var(--ff-accent) 30%, transparent);
+    }
+  }
+
+  &[data-downed] {
+    opacity: 0.18;
+  }
+}

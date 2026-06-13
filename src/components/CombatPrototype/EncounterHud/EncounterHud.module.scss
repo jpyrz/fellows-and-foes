@@ -1,0 +1,18 @@
+.hud {
+  grid-area: hud;
+  padding: 1rem clamp(1rem, 3vw, 2rem) 0.8rem;
+  border-bottom: 1px solid var(--ff-border);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ff-accent) 5%, transparent),
+      transparent
+    ),
+    color-mix(in srgb, var(--ff-shadow) 12%, transparent);
+}
+
+@media (max-width: 30rem) {
+  .hud {
+    padding-inline: 0.9rem;
+  }
+}

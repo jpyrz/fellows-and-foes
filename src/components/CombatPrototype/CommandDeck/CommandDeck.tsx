@@ -1,0 +1,100 @@
+import { Button, Text } from '@mantine/core'
+import type {
+  CombatStatus,
+  Combatant,
+  Skill,
+} from '../../../game/combat/types'
+import { SkillMenu } from './SkillMenu/SkillMenu'
+import { TargetMenu } from './TargetMenu/TargetMenu'
+import styles from './CommandDeck.module.scss'
+
+interface CommandDeckProps {
+  activeCombatant?: Combatant
+  isSkillAvailable: (skill: Skill) => boolean
+  onBackToSkills: () => void
+  onChooseTarget: (targetId: string) => void
+  onReset: () => void
+  onSelectSkill: (skillId: string) => void
+  selectedSkill?: Skill
+  status: CombatStatus
+  validTargets: Combatant[]
+}
+
+export function CommandDeck({
+  activeCombatant,
+  isSkillAvailable,
+  onBackToSkills,
+  onChooseTarget,
+  onReset,
+  onSelectSkill,
+  selectedSkill,
+  status,
+  validTargets,
+}: CommandDeckProps) {
+  return (
+    <section className={styles.commandDeck}>
+      {status === 'active' && activeCombatant ? (
+        <>
+          <div className={styles.commandHeader}>
+            <div className={styles.activePortrait}>
+              {activeCombatant.name.slice(0, 1)}
+            </div>
+            <div className={styles.commandTitle}>
+              <Text size="10px" c="brand" fw={800} tt="uppercase">
+                Your turn
+              </Text>
+              <Text fw={800} data-cy="active-turn">
+                {activeCombatant.name}
+              </Text>
+            </div>
+            <div className={styles.activeStamina}>
+              <Text size="10px" c="dimmed" fw={700}>
+                STAMINA
+              </Text>
+              <Text fw={800}>{activeCombatant.stamina}</Text>
+            </div>
+          </div>
+
+          {selectedSkill ? (
+            <TargetMenu
+              onBack={onBackToSkills}
+              onChooseTarget={onChooseTarget}
+              skill={selectedSkill}
+              targets={validTargets}
+            />
+          ) : (
+            <SkillMenu
+              isSkillAvailable={isSkillAvailable}
+              onSelectSkill={onSelectSkill}
+              skills={activeCombatant.skills}
+            />
+          )}
+        </>
+      ) : (
+        <div className={styles.resultMenu}>
+          <Text
+            size="10px"
+            c={status === 'victory' ? 'brand' : 'red'}
+            fw={800}
+            tt="uppercase"
+          >
+            Encounter complete
+          </Text>
+          <Text component="h2" fw={800} size="xl">
+            {status === 'victory'
+              ? 'The road is yours.'
+              : 'The expedition has fallen.'}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {status === 'victory'
+              ? 'The party survives and may continue toward Bellweather.'
+              : 'Try a different sequence of attacks and support skills.'}
+          </Text>
+          <Button color="brand" fullWidth mt="sm" onClick={onReset}>
+            Fight again
+          </Button>
+        </div>
+      )}
+    </section>
+  )
+}

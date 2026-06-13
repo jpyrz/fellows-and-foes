@@ -1,0 +1,290 @@
+.overlay {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  padding: 1.25rem;
+  background: color-mix(in srgb, var(--ff-bg-root) 82%, transparent);
+  backdrop-filter: blur(8px);
+  inset: 0;
+  place-items: center;
+}
+
+.actionRoller {
+  display: flex;
+  width: min(32rem, 100%);
+  min-height: 26rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  text-align: center;
+  border: 1px solid var(--ff-border-strong);
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in srgb, var(--ff-accent) 15%, transparent),
+      transparent 14rem
+    ),
+    color-mix(in srgb, var(--ff-bg-panel) 94%, transparent);
+  box-shadow:
+    0 2rem 5rem color-mix(in srgb, var(--ff-shadow) 70%, transparent),
+    inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
+}
+
+.rollHeading {
+  display: grid;
+  gap: 0.2rem;
+
+  > h2 {
+    margin: 0;
+  }
+}
+
+.rollPreview {
+  display: grid;
+  max-width: 22rem;
+  gap: 0.15rem;
+  margin: 0.65rem auto 0;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ff-surface) 80%, transparent);
+
+  > span,
+  > small {
+    color: var(--ff-text-muted);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  > strong {
+    font-size: 0.8rem;
+  }
+}
+
+.rollingStage,
+.resultStage {
+  display: grid;
+  justify-items: center;
+  gap: 1.15rem;
+}
+
+.die {
+  display: grid;
+  width: 7rem;
+  height: 7rem;
+  color: var(--ff-on-accent);
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 900;
+  place-items: center;
+  border: 2px solid color-mix(in srgb, var(--ff-text) 40%, transparent);
+  border-radius: 1.4rem 1.4rem 1.4rem 0.35rem;
+  background: var(--ff-accent);
+  box-shadow:
+    0 0 0 0.5rem color-mix(in srgb, var(--ff-accent) 12%, transparent),
+    0 0 3rem color-mix(in srgb, var(--ff-accent) 40%, transparent);
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover:not(:disabled):not([data-settled]) {
+    box-shadow:
+      0 0 0 0.7rem color-mix(in srgb, var(--ff-accent) 16%, transparent),
+      0 0 3.5rem color-mix(in srgb, var(--ff-accent) 50%, transparent);
+    transform: translateY(-0.2rem) rotate(2deg);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--ff-text);
+    outline-offset: 0.45rem;
+  }
+
+  &[data-rolling] {
+    cursor: wait;
+    animation: tumble 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  }
+
+  &[data-no-dice][data-rolling] {
+    animation: invoke 800ms ease-in-out infinite;
+  }
+
+  &[data-settled] {
+    cursor: default;
+    animation: settle 280ms ease-out both;
+  }
+
+  &[data-settled][data-success] {
+    border-color: color-mix(in srgb, var(--ff-health) 75%, var(--ff-text));
+    background: var(--ff-health);
+    box-shadow:
+      0 0 0 0.5rem color-mix(in srgb, var(--ff-health) 12%, transparent),
+      0 0 3rem color-mix(in srgb, var(--ff-health) 40%, transparent);
+  }
+
+  &[data-settled][data-failure] {
+    color: var(--ff-text);
+    border-color: color-mix(in srgb, var(--ff-danger) 75%, var(--ff-text));
+    background: var(--ff-danger);
+    box-shadow:
+      0 0 0 0.5rem color-mix(in srgb, var(--ff-danger) 12%, transparent),
+      0 0 3rem color-mix(in srgb, var(--ff-danger) 40%, transparent);
+  }
+}
+
+.verdict {
+  display: grid;
+  width: min(20rem, 100%);
+  gap: 0.15rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid;
+  border-radius: 0.55rem;
+  text-transform: uppercase;
+
+  > span {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+  }
+
+  > small {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  &[data-success] {
+    color: var(--ff-health);
+    border-color: color-mix(in srgb, var(--ff-health) 55%, transparent);
+    background: color-mix(in srgb, var(--ff-health) 10%, transparent);
+  }
+
+  &[data-failure] {
+    color: var(--ff-danger);
+    border-color: color-mix(in srgb, var(--ff-danger) 55%, transparent);
+    background: color-mix(in srgb, var(--ff-danger) 10%, transparent);
+  }
+}
+
+.rollResults {
+  display: flex;
+  max-width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.rollResult {
+  display: grid;
+  min-width: 7.5rem;
+  gap: 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.55rem;
+  background: var(--ff-surface);
+
+  > span,
+  > small {
+    color: var(--ff-text-muted);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  > strong {
+    color: var(--ff-text);
+    font-size: 1rem;
+  }
+
+  &[data-success] {
+    border-color: var(--ff-border-strong);
+
+    > small {
+      color: var(--ff-accent);
+    }
+  }
+
+  &[data-failure] {
+    border-color: color-mix(in srgb, var(--ff-danger) 45%, transparent);
+
+    > small {
+      color: var(--ff-danger);
+    }
+  }
+}
+
+.resultMessage {
+  max-width: 25rem;
+}
+
+.continueButton {
+  min-width: 10rem;
+}
+
+@keyframes tumble {
+  0% {
+    transform: rotate(-8deg) translateY(0) scale(0.96);
+  }
+
+  45% {
+    transform: rotate(9deg) translateY(-0.65rem) scale(1.04);
+  }
+
+  100% {
+    transform: rotate(-8deg) translateY(0) scale(0.96);
+  }
+}
+
+@keyframes invoke {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(0.92) rotate(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05) rotate(45deg);
+  }
+}
+
+@keyframes settle {
+  0% {
+    opacity: 0.4;
+    transform: scale(1.12) rotate(8deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@media (max-height: 38rem) {
+  .actionRoller {
+    min-height: 0;
+    gap: 0.85rem;
+    padding-block: 1rem;
+  }
+
+  .die {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .resultStage {
+    gap: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .die {
+    animation: none;
+    transition: none;
+  }
+}

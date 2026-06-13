@@ -1,0 +1,30 @@
+.logDrawer {
+  color: var(--ff-text);
+  background: var(--ff-bg-panel);
+}
+
+.logDrawerHeader {
+  color: var(--ff-text);
+  border-bottom: 1px solid var(--ff-border);
+  background: var(--ff-bg-panel);
+}
+
+.logEntry {
+  padding: 0.7rem;
+  border-left: 2px solid var(--ff-text-muted);
+  border-radius: 0 var(--mantine-radius-sm) var(--mantine-radius-sm) 0;
+  background: color-mix(in srgb, var(--ff-shadow) 18%, transparent);
+
+  &[data-tone='hero'] {
+    border-left-color: var(--ff-info);
+  }
+
+  &[data-tone='enemy'],
+  &[data-tone='danger'] {
+    border-left-color: var(--ff-danger);
+  }
+
+  &[data-tone='success'] {
+    border-left-color: var(--ff-accent);
+  }
+}

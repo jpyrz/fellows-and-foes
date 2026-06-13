@@ -1,0 +1,92 @@
+.skillMenu {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.skillCommand {
+  display: grid;
+  min-height: 4.6rem;
+  grid-template-columns: auto minmax(8rem, 1fr) minmax(13rem, auto);
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  color: inherit;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ff-text) 3%, transparent),
+      transparent
+    ),
+    color-mix(in srgb, var(--ff-shadow) 20%, transparent);
+  transition:
+    border-color 130ms ease,
+    transform 130ms ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--ff-border-strong);
+    transform: translateX(2px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
+}
+
+.commandKey {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  color: var(--ff-accent);
+  font-family: monospace;
+  font-size: 0.65rem;
+  font-weight: 900;
+  place-items: center;
+  border: 1px solid var(--ff-border-strong);
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--ff-accent) 5%, transparent);
+}
+
+.skillText {
+  min-width: 0;
+}
+
+.skillMeta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(4rem, auto));
+  gap: 0.75rem;
+  text-align: left;
+
+  > span {
+    display: grid;
+    align-content: center;
+  }
+}
+
+@media (max-width: 60rem) {
+  .skillMenu {
+    gap: 0.4rem;
+  }
+
+  .skillCommand {
+    min-height: 3.45rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .skillMeta {
+    display: flex;
+    max-width: 8rem;
+    flex-direction: column;
+    gap: 0.1rem;
+    text-align: right;
+
+    > span {
+      > :first-child {
+        display: none;
+      }
+    }
+  }
+}
