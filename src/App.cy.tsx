@@ -47,6 +47,7 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Nyra')
     cy.contains('button', 'Continue').click()
 
+    cy.get('[data-feedback="damage"]').should('exist')
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Elowen')
     cy.contains('button', 'Log').click()
     cy.get('[data-cy="combat-log"]')
@@ -67,6 +68,9 @@ describe('<CombatPrototype />', () => {
       'Ready to invoke',
     )
     resolvePendingAction()
+    cy.get('button[aria-label="Inspect Brann"][data-feedback="shield"]').should(
+      'exist',
+    )
     cy.contains('button', 'Log').click()
     cy.get('[data-cy="combat-log"]').should(
       'contain.text',
@@ -120,7 +124,21 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="skill-quick-shot"]').click()
     cy.contains('h2', 'Quick Shot').should('be.visible')
     cy.get('[data-cy="target-ashfang"]').should('be.visible')
-    cy.contains('Tap one of 2 glowing targets').should('be.visible')
+    cy.contains('Tap one of 2 marked targets').should('be.visible')
+  })
+
+  it('keeps secondary unit stats behind inspection', () => {
+    cy.mount(<CombatPrototype />)
+
+    cy.contains('DEF 12').should('not.exist')
+    cy.get('button[aria-label="Inspect Ashfang"]').click()
+    cy.get('[data-cy="unit-inspector"]')
+      .should('contain.text', 'Ember Stalker')
+      .and('contain.text', 'Defense')
+      .and('contain.text', 'Pounces on the living hero')
+
+    cy.get('button[aria-label="Close unit details"]').click()
+    cy.get('[data-cy="unit-inspector"]').should('not.exist')
   })
 
   it('ends the encounter when the final enemy is defeated', () => {

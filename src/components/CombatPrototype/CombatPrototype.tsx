@@ -38,6 +38,9 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   )
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null)
   const [isTargeting, setIsTargeting] = useState(false)
+  const [inspectedCombatantId, setInspectedCombatantId] = useState<
+    string | null
+  >(null)
   const [pendingAction, setPendingAction] = useState<{
     resolution?: HeroActionResolution
     sequence: ActionSequence
@@ -205,6 +208,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   }
 
   function selectSkill(skillId: string) {
+    setInspectedCombatantId(null)
     setSelectedSkillId(skillId)
     setIsTargeting(true)
   }
@@ -227,6 +231,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     actionToken.current += 1
     resolvingAction.current = false
     setCombat(createInitialCombatState())
+    setInspectedCombatantId(null)
     setSelectedSkillId(null)
     setIsTargeting(false)
     setPendingAction(null)
@@ -252,8 +257,11 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           enemies={enemies}
           heroes={heroes}
           isTargeting={isTargeting}
+          inspectedCombatantId={inspectedCombatantId}
           latestMessage={combat.log.at(-1)?.message}
+          onCloseInspection={() => setInspectedCombatantId(null)}
           onChooseTarget={chooseTarget}
+          onInspect={setInspectedCombatantId}
           targetableIds={
             isTargeting ? validTargets.map((target) => target.id) : []
           }

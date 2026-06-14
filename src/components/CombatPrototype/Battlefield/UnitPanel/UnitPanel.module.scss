@@ -1,92 +1,105 @@
 .unit {
   appearance: none;
-  display: flex;
-  width: 100%;
+  position: relative;
+  display: grid;
   min-width: 0;
-  min-height: 5rem;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.65rem;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem;
   color: inherit;
   font: inherit;
-  text-align: left;
-  border: 1px solid var(--ff-border);
-  border-radius: 0.55rem;
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--ff-text) 3%, transparent),
-      transparent
-    ),
-    color-mix(in srgb, var(--ff-bg-root) 78%, transparent);
+  text-align: center;
+  border: 0;
+  background: transparent;
   transition:
-    border-color 150ms ease,
-    opacity 150ms ease,
-    transform 150ms ease;
+    filter 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
 
-  &:disabled {
-    cursor: default;
+  &:not(:disabled) {
+    cursor: pointer;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
   }
 
   &[data-active] {
-    border-color: var(--ff-border-strong);
-    box-shadow:
-      inset 3px 0 var(--ff-accent),
-      0 0 1rem color-mix(in srgb, var(--ff-accent) 8%, transparent);
-    transform: translateX(2px);
+    .portrait {
+      border-color: var(--ff-accent);
+      box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--ff-accent) 17%, transparent),
+        0 0 1.5rem color-mix(in srgb, var(--ff-accent) 32%, transparent);
+      animation: activeGlow 1.8s ease-in-out infinite;
+    }
   }
 
   &[data-downed] {
-    opacity: 0.38;
-    filter: grayscale(0.8);
+    opacity: 0.35;
+    filter: grayscale(0.9);
+
+    .portrait {
+      transform: rotate(-4deg);
+    }
   }
 
   &[data-targeting]:not([data-targetable]) {
-    opacity: 0.3;
-    filter: saturate(0.4);
+    opacity: 0.24;
+    filter: grayscale(0.65);
   }
 
   &[data-targetable] {
-    cursor: pointer;
-    border-color: var(--ff-accent);
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ff-accent) 30%, transparent),
-      0 0 1.2rem color-mix(in srgb, var(--ff-accent) 25%, transparent);
-    animation: targetPulse 1.4s ease-in-out infinite;
+    z-index: 2;
 
-    &:hover {
-      transform: translateY(-3px) scale(1.01);
+    .portrait {
+      transform: translateY(-2px) scale(1.04);
     }
+  }
+
+  &[data-feedback='damage'] {
+    animation: damageShake 420ms ease-out;
+
+    .portrait::before {
+      background: color-mix(in srgb, var(--ff-danger) 58%, transparent);
+      animation: feedbackFlash 600ms ease-out;
+    }
+  }
+
+  &[data-feedback='heal'] .portrait::before {
+    background: color-mix(in srgb, var(--ff-health) 55%, transparent);
+    animation: feedbackFlash 650ms ease-out;
+  }
+
+  &[data-feedback='shield'] .portrait::before {
+    background: color-mix(in srgb, var(--ff-info) 55%, transparent);
+    animation: feedbackFlash 650ms ease-out;
   }
 
   &[data-layout='party'] {
     display: grid;
-    min-height: 7.5rem;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 0.35rem;
-    padding: 0.75rem;
-    text-align: center;
+    min-height: 7.6rem;
+    grid-template-rows: auto auto;
+    align-content: end;
+    padding: 0;
 
     .portrait {
-      width: 3.25rem;
-      height: 3.25rem;
+      width: clamp(4.75rem, 9vw, 6.25rem);
+      height: clamp(4.75rem, 9vw, 6.25rem);
     }
 
     .unitDetails {
       width: 100%;
-    }
-
-    .unitTitle {
-      display: none;
-    }
-
-    .staminaPips {
-      justify-content: center;
-
-      > span {
-        display: none;
-      }
+      max-width: 10rem;
+      padding: 0.45rem 0.55rem 0.5rem;
+      border-top: 1px solid var(--ff-border);
+      border-bottom: 1px solid var(--ff-border);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--ff-bg-root) 88%, transparent) 12%,
+        color-mix(in srgb, var(--ff-bg-root) 88%, transparent) 88%,
+        transparent
+      );
     }
   }
 }
@@ -94,140 +107,299 @@
 .portrait {
   position: relative;
   display: grid;
-  width: 3rem;
-  height: 3rem;
-  flex: 0 0 auto;
+  width: clamp(6rem, 12vw, 8.75rem);
+  height: clamp(6rem, 12vw, 8.75rem);
   place-items: center;
   overflow: visible;
-  border: 1px solid var(--ff-border);
-  border-radius: 0.55rem 0.55rem 0.55rem 0.15rem;
+  border: 2px solid color-mix(in srgb, var(--ff-text) 28%, transparent);
+  border-radius: 0.15rem;
   background:
     linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--ff-text) 15%, transparent),
-      transparent 60%
+      150deg,
+      color-mix(in srgb, white 25%, transparent),
+      transparent 55%
     ),
-    var(--ff-portrait);
+    var(--ff-portrait-paper);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, black 22%, transparent),
+    0 0.7rem 1.5rem color-mix(in srgb, var(--ff-shadow) 48%, transparent);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 
   img {
-    width: 76%;
-    height: 76%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 0.2rem 0.3rem var(--ff-shadow));
+    clip-path: inset(0 round 0.05rem);
+    filter: contrast(1.08);
+    transform: scale(1.04);
+  }
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    content: '';
+    opacity: 0;
+  }
+
+  &::after {
+    position: absolute;
+    inset: 0.28rem;
+    z-index: 2;
+    pointer-events: none;
+    border: 1px solid color-mix(in srgb, black 20%, transparent);
+    content: '';
   }
 }
 
-.targetMarker {
+.targetReticle {
   position: absolute;
-  right: 50%;
-  bottom: -0.8rem;
-  z-index: 2;
-  padding: 0.12rem 0.35rem;
-  color: var(--ff-on-accent);
-  font-size: 0.48rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  border-radius: 999px;
-  background: var(--ff-accent);
-  box-shadow: 0 0.2rem 0.5rem var(--ff-shadow);
-  transform: translateX(50%);
+  inset: -0.55rem;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--ff-accent), var(--ff-accent)) top left / 1.25rem 2px
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) top left / 2px 1.25rem
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) top right / 1.25rem 2px
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) top right / 2px 1.25rem
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) bottom left / 1.25rem 2px
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) bottom left / 2px 1.25rem
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) bottom right / 1.25rem 2px
+      no-repeat,
+    linear-gradient(var(--ff-accent), var(--ff-accent)) bottom right / 2px 1.25rem
+      no-repeat;
+  filter: drop-shadow(
+    0 0 0.35rem color-mix(in srgb, var(--ff-accent) 70%, transparent)
+  );
+  animation: reticlePulse 1.2s ease-in-out infinite;
 }
 
 .turnMarker {
   position: absolute;
-  right: -0.25rem;
-  bottom: -0.25rem;
-  width: 0.7rem;
-  height: 0.7rem;
-  border: 2px solid var(--ff-bg-panel);
-  border-radius: 50%;
+  top: -0.65rem;
+  left: 50%;
+  z-index: 4;
+  padding: 0.16rem 0.45rem;
+  color: var(--ff-on-accent);
+  font-size: 0.48rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 999px;
   background: var(--ff-accent);
-  box-shadow: 0 0 0.5rem
-    color-mix(in srgb, var(--ff-accent) 60%, transparent);
+  box-shadow: 0 0 0.7rem
+    color-mix(in srgb, var(--ff-accent) 45%, transparent);
+  transform: translateX(-50%);
 }
 
-.unitDetails,
-.unitName {
+.feedbackLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  color: var(--ff-text);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 1px 2px var(--ff-shadow),
+    0 0 0.6rem var(--ff-shadow);
+  text-transform: uppercase;
+  animation: feedbackLabel 650ms ease-out forwards;
+}
+
+.unitDetails {
+  width: 100%;
   min-width: 0;
-  flex: 1;
 }
 
-.healthBar {
+.unitName {
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0.3rem var(--ff-shadow);
+}
+
+.healthBar,
+.staminaBar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.35rem;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+
+  > span {
+    display: block;
+    height: 0.38rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, black 45%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ff-text-muted) 22%, transparent);
+    box-shadow: inset 0 1px 2px var(--ff-shadow);
+
+    > i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 300ms ease;
+    }
+  }
 }
 
-.staminaPips {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: 0.35rem;
+.healthBar > span > i {
+  background: var(--ff-danger);
+}
 
-  > i {
-    width: 0.45rem;
-    height: 3px;
-    border-radius: 2px;
-    background: color-mix(in srgb, var(--ff-text-muted) 30%, transparent);
+.unit[data-layout='party'] .healthBar > span > i {
+  background: var(--ff-health);
+}
 
-    &[data-filled] {
+.staminaBar {
+  margin-top: 0.18rem;
+
+  > span {
+    height: 0.25rem;
+
+    > i {
       background: var(--ff-stamina);
     }
   }
+}
 
-  > span {
-    margin-left: auto;
-    color: var(--ff-text-muted);
-    font-size: 0.6rem;
-    font-weight: 800;
+.statuses {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+
+  span {
+    color: var(--ff-warning);
+    font-size: 0.52rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 }
 
 @media (max-width: 60rem) {
   .unit {
-    min-height: 4.6rem;
-    gap: 0.45rem;
-    padding: 0.45rem;
+    gap: 0.25rem;
 
     &[data-layout='party'] {
-      min-height: 5.2rem;
-      gap: 0.15rem;
-      padding: 0.3rem;
+      min-height: 6.5rem;
 
       .portrait {
-        width: 2.4rem;
-        height: 2.4rem;
+        width: clamp(3.7rem, 17vw, 4.75rem);
+        height: clamp(3.7rem, 17vw, 4.75rem);
+      }
+
+      .unitDetails {
+        padding: 0.3rem 0.25rem 0.35rem;
       }
     }
   }
 
   .portrait {
-    width: 3.1rem;
-    height: 3.1rem;
+    width: clamp(5.2rem, 24vw, 6.5rem);
+    height: clamp(5.2rem, 24vw, 6.5rem);
+  }
+
+  .unitName {
+    font-size: 0.72rem;
+  }
+
+  .healthBar,
+  .staminaBar {
+    gap: 0.2rem;
   }
 }
 
-@keyframes targetPulse {
+@keyframes reticlePulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes activeGlow {
   0%,
   100% {
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ff-accent) 30%, transparent),
-      0 0 0.7rem color-mix(in srgb, var(--ff-accent) 20%, transparent);
+      0 0 0 2px color-mix(in srgb, var(--ff-accent) 14%, transparent),
+      0 0 1rem color-mix(in srgb, var(--ff-accent) 22%, transparent);
   }
 
   50% {
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ff-accent) 45%, transparent),
-      0 0 1.4rem color-mix(in srgb, var(--ff-accent) 38%, transparent);
+      0 0 0 2px color-mix(in srgb, var(--ff-accent) 22%, transparent),
+      0 0 2rem color-mix(in srgb, var(--ff-accent) 38%, transparent);
+  }
+}
+
+@keyframes damageShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px) rotate(-1deg);
+  }
+
+  45% {
+    transform: translateX(5px) rotate(1deg);
+  }
+
+  70% {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes feedbackFlash {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes feedbackLabel {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -20%);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -110%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .unit[data-targetable] {
-    animation: none;
+  .unit,
+  .portrait,
+  .targetReticle {
+    animation: none !important;
   }
 }

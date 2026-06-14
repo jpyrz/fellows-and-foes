@@ -54,7 +54,7 @@ export function SkillDetail({
 
       <div className={styles.actions}>
         <Text size="10px" c="brand" fw={800} tt="uppercase">
-          Tap one of {targetCount} glowing targets
+          Tap one of {targetCount} marked targets
         </Text>
         <Button
           color="gray"

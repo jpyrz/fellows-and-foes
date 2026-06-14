@@ -1,15 +1,27 @@
 # Asset Credits
 
-Placeholder combat art comes from [Game-icons.net](https://game-icons.net/)
-and is used under the
+Ability icons and supporting combat symbols come from
+[Game-icons.net](https://game-icons.net/) and are used under the
 [Creative Commons Attribution 3.0 license](https://creativecommons.org/licenses/by/3.0/).
 The SVGs are stored locally in white-on-transparent form so the game theme can
 color their surrounding UI.
 
+## Lemur's Fantasy Portraits
+
+Combatant portraits come from
+[Lemur's Fantasy Portraits](https://jonaspeheim.itch.io/lemurs-portraits) by
+Jon Aspeheim and are used under the
+[Creative Commons Attribution 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+
+- `elf_12.png`: Nyra
+- `human_44.png`: Elowen
+- `dwarf_11.png`: Brann
+- `demon_01.png`: Ashfang
+- `orc_03.png`: Mireling
+
 ## Lorc
 
-- [High Shot](https://game-icons.net/1x1/lorc/high-shot.html): Quick Shot and
-  Nyra
+- [High Shot](https://game-icons.net/1x1/lorc/high-shot.html): Quick Shot
 - [Double Shot](https://game-icons.net/1x1/lorc/double-shot.html): Twin Strike
 - [Dodging](https://game-icons.net/1x1/lorc/dodging.html): Evasive Guard
 - [Energy Shield](https://game-icons.net/1x1/lorc/energy-shield.html): Aegis

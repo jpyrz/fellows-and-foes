@@ -60,7 +60,7 @@ export function CommandDeck({
               {isTargeting ? 'Select a combatant' : 'Abilities'}
             </Text>
             <Text size="10px" c={isTargeting ? 'brand' : 'dimmed'} fw={800}>
-              {isTargeting ? 'Valid targets are glowing' : 'Tap to inspect'}
+              {isTargeting ? 'Valid targets are marked' : 'Tap to inspect'}
             </Text>
           </div>
 

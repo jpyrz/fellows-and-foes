@@ -1,6 +1,9 @@
-import { Badge, Group, Progress, Text } from '@mantine/core'
+import { Text } from '@mantine/core'
+import { useEffect, useRef, useState } from 'react'
 import type { Combatant } from '../../../../game/combat/types'
 import styles from './UnitPanel.module.scss'
+
+type CombatFeedback = 'damage' | 'heal' | 'shield' | null
 
 interface UnitPanelProps {
   combatant: Combatant
@@ -9,6 +12,7 @@ interface UnitPanelProps {
   isTargeting: boolean
   layout?: 'default' | 'party'
   onChooseTarget: (targetId: string) => void
+  onInspect: (combatantId: string) => void
 }
 
 export function UnitPanel({
@@ -18,24 +22,69 @@ export function UnitPanel({
   isTargeting,
   layout = 'default',
   onChooseTarget,
+  onInspect,
 }: UnitPanelProps) {
   const healthPercent = (combatant.health / combatant.maxHealth) * 100
+  const staminaPercent =
+    combatant.maxStamina > 0
+      ? (combatant.stamina / combatant.maxStamina) * 100
+      : 0
   const isDown = combatant.health === 0
+  const previousHealth = useRef(combatant.health)
+  const previousShield = useRef(combatant.shield)
+  const [feedback, setFeedback] = useState<CombatFeedback>(null)
+
+  useEffect(() => {
+    let nextFeedback: CombatFeedback = null
+
+    if (combatant.health < previousHealth.current) {
+      nextFeedback = 'damage'
+    } else if (combatant.health > previousHealth.current) {
+      nextFeedback = 'heal'
+    } else if (combatant.shield > previousShield.current) {
+      nextFeedback = 'shield'
+    }
+
+    previousHealth.current = combatant.health
+    previousShield.current = combatant.shield
+
+    if (!nextFeedback) {
+      return
+    }
+
+    setFeedback(nextFeedback)
+    const timeout = window.setTimeout(() => setFeedback(null), 700)
+    return () => window.clearTimeout(timeout)
+  }, [combatant.health, combatant.shield])
+
+  function handleClick() {
+    if (isTargetable) {
+      onChooseTarget(combatant.id)
+      return
+    }
+
+    if (!isTargeting) {
+      onInspect(combatant.id)
+    }
+  }
 
   return (
     <button
       aria-label={
-        isTargetable ? `Target ${combatant.name}` : combatant.name
+        isTargetable
+          ? `Target ${combatant.name}`
+          : `Inspect ${combatant.name}`
       }
       className={styles.unit}
       data-active={isActive || undefined}
       data-downed={isDown || undefined}
+      data-feedback={feedback ?? undefined}
       data-layout={layout}
       data-targetable={isTargetable || undefined}
       data-targeting={isTargeting || undefined}
       data-cy={isTargetable ? `target-${combatant.id}` : undefined}
-      disabled={!isTargetable}
-      onClick={() => onChooseTarget(combatant.id)}
+      disabled={isTargeting && !isTargetable}
+      onClick={handleClick}
       type="button"
     >
       <div
@@ -43,84 +92,54 @@ export function UnitPanel({
         data-cy={`combatant-${combatant.id}`}
       >
         <img src={combatant.portrait} alt="" />
-        {isActive && <i className={styles.turnMarker} />}
-        {isTargetable && <span className={styles.targetMarker}>Target</span>}
+        {isActive && <span className={styles.turnMarker}>Active</span>}
+        {isTargetable && (
+          <span className={styles.targetReticle} aria-hidden="true" />
+        )}
+        {feedback && (
+          <span className={styles.feedbackLabel}>
+            {feedback === 'damage'
+              ? 'Hit'
+              : feedback === 'heal'
+                ? 'Healed'
+                : 'Shielded'}
+          </span>
+        )}
       </div>
 
       <div className={styles.unitDetails}>
-        <Group justify="space-between" gap="xs" wrap="nowrap">
-          <div className={styles.unitName}>
-            <Text fw={800} size="sm" truncate>
-              {combatant.name}
-            </Text>
-            <Text
-              className={styles.unitTitle}
-              size="10px"
-              c="dimmed"
-              tt="uppercase"
-              fw={700}
-              truncate
-            >
-              {combatant.title}
-            </Text>
-          </div>
-          <Text size="10px" c="dimmed" fw={700}>
-            DEF {combatant.defense}
-          </Text>
-        </Group>
+        <Text className={styles.unitName} fw={900} size="sm" truncate>
+          {combatant.name}
+        </Text>
 
         <div className={styles.healthBar}>
-          <Progress
-            value={healthPercent}
-            color={
-              isDown
-                ? 'gray'
-                : combatant.team === 'heroes'
-                  ? 'var(--ff-health)'
-                  : 'var(--ff-danger)'
-            }
-            size={7}
-          />
-          <Text size="10px" fw={700} data-cy={`${combatant.id}-health`}>
+          <span>
+            <i style={{ width: `${healthPercent}%` }} />
+          </span>
+          <Text size="9px" fw={800} data-cy={`${combatant.id}-health`}>
             {combatant.health}/{combatant.maxHealth}
           </Text>
         </div>
 
         {combatant.team === 'heroes' && (
-          <div
-            className={styles.staminaPips}
-            data-cy={`${combatant.id}-stamina`}
-          >
-            {Array.from({ length: combatant.maxStamina }, (_, index) => (
-              <i
-                key={index}
-                data-filled={index < combatant.stamina || undefined}
-              />
-            ))}
+          <div className={styles.staminaBar} data-cy={`${combatant.id}-stamina`}>
             <span>
-              {combatant.stamina}/{combatant.maxStamina}
+              <i style={{ width: `${staminaPercent}%` }} />
             </span>
+            <Text size="9px" fw={800}>
+              {combatant.stamina}/{combatant.maxStamina}
+            </Text>
           </div>
         )}
 
         {(combatant.shield > 0 || combatant.staggered || isDown) && (
-          <Group gap={4} mt={4}>
-            {combatant.shield > 0 && (
-              <Badge size="xs" color="var(--ff-info)" variant="filled">
-                {combatant.shield} shield
-              </Badge>
-            )}
-            {combatant.staggered && (
-              <Badge size="xs" color="var(--ff-warning)" variant="filled">
-                Staggered
-              </Badge>
-            )}
+          <div className={styles.statuses}>
+            {combatant.shield > 0 && <span>◆ {combatant.shield}</span>}
+            {combatant.staggered && <span>Staggered</span>}
             {isDown && (
-              <Badge size="xs" color="gray" variant="filled">
-                {combatant.team === 'heroes' ? 'Down' : 'Defeated'}
-              </Badge>
+              <span>{combatant.team === 'heroes' ? 'Down' : 'Defeated'}</span>
             )}
-          </Group>
+          </div>
         )}
       </div>
     </button>

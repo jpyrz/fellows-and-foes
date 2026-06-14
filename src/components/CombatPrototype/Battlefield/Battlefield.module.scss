@@ -1,23 +1,23 @@
 .battlefield {
+  position: relative;
   grid-area: battle;
-  display: flex;
+  display: grid;
   min-height: 0;
-  flex-direction: column;
-  justify-content: space-between;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.75rem;
   padding: clamp(1rem, 3vw, 2rem);
-  gap: 1rem;
   overflow-y: auto;
   background:
     radial-gradient(
-      ellipse at 50% 42%,
+      ellipse at 50% 45%,
       color-mix(in srgb, var(--ff-accent) 7%, transparent),
-      transparent 52%
+      transparent 48%
     ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--ff-shadow) 25%, transparent),
-      transparent 35%,
-      color-mix(in srgb, var(--ff-shadow) 18%, transparent)
+      color-mix(in srgb, var(--ff-shadow) 30%, transparent),
+      transparent 38%,
+      color-mix(in srgb, var(--ff-shadow) 22%, transparent)
     ),
     repeating-linear-gradient(
       90deg,
@@ -27,41 +27,62 @@
     );
 }
 
+.enemyLane,
+.partyLane {
+  display: grid;
+  min-height: 0;
+  align-content: center;
+}
+
+.enemyLane {
+  align-content: start;
+}
+
+.partyLane {
+  align-content: end;
+}
+
 .laneLabel {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.55rem;
   color: var(--ff-text-muted);
-  font-size: 0.6rem;
+  font-size: 0.56rem;
   font-weight: 900;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .unitGrid {
   display: grid;
-  gap: 0.75rem;
+  align-items: end;
+  justify-content: center;
+  gap: clamp(1rem, 4vw, 2rem);
 }
 
 .enemyGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(8rem, 15rem));
 }
 
 .partyGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(7rem, 1fr));
 }
 
 .eventRibbon {
+  position: relative;
   display: grid;
-  min-height: 3.4rem;
+  min-height: 3.25rem;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.7rem 0.85rem;
+  padding: 0.65rem 0.85rem;
   color: var(--ff-text-muted);
   border-block: 1px solid var(--ff-border);
-  background: color-mix(in srgb, var(--ff-shadow) 28%, transparent);
-  box-shadow:
-    0 1rem 3rem color-mix(in srgb, var(--ff-shadow) 22%, transparent),
-    inset 0 1px color-mix(in srgb, var(--ff-text) 4%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ff-shadow) 45%, transparent) 10%,
+    color-mix(in srgb, var(--ff-shadow) 45%, transparent) 90%,
+    transparent
+  );
 
   > span {
     color: var(--ff-accent);
@@ -71,15 +92,30 @@
 
 @media (max-width: 60rem) {
   .battlefield {
-    padding: 0.75rem 0.9rem 1rem;
-    gap: 0.55rem;
+    grid-template-rows: minmax(8.5rem, auto) minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    padding: 0.7rem 0.9rem 0.75rem;
+  }
+
+  .enemyLane {
+    align-content: start;
   }
 
   .unitGrid {
-    gap: 0.45rem;
+    gap: 0.65rem;
+  }
+
+  .enemyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .partyGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
   .eventRibbon {
+    align-self: center;
     min-height: 2.8rem;
     padding: 0.5rem 0.65rem;
   }
