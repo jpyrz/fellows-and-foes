@@ -308,7 +308,7 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="target-ashfang"]').click()
     cy.get('[data-cy="item-confirmation"]')
       .should('be.visible')
-      .and('contain.text', 'consumes your turn and one item')
+      .and('contain.text', 'still use an ability this turn')
     cy.contains('button', 'Back').click()
     cy.get('[data-cy="item-confirmation"]').should('not.exist')
     cy.get('[data-cy="ashfang-health"]').should('contain.text', '24/24')
@@ -323,6 +323,14 @@ describe('<CombatPrototype />', () => {
       .should('contain', 'Ashfang')
       .and('have.attr', 'data-action-phase', 'impact')
     cy.get('[data-cy="ashfang-health"]').should('contain.text', '19/24')
+    cy.get('[data-action-actor]').should('not.exist')
+    cy.get('[data-cy="active-turn"]').should('contain.text', 'Nyra')
+    cy.contains('button', 'Items')
+      .should('be.disabled')
+      .and('contain.text', 'Used')
+
+    selectSkillAndTarget('quick-shot', 'ashfang')
+    resolvePendingAction()
     cy.get('[data-cy="turn-announcement"]').should(
       'have.attr',
       'data-team',
@@ -360,6 +368,15 @@ describe('<CombatPrototype />', () => {
 
     cy.viewport(375, 812)
     cy.contains('button', 'Skip').should('be.visible')
+  })
+
+  it('shows two empty ability slots', () => {
+    cy.mount(<CombatPrototype />)
+
+    cy.get('[aria-label="Empty ability slot"]').should('have.length', 2)
+    cy.get('[aria-label="Empty ability slot"]')
+      .should('contain.text', '4')
+      .and('contain.text', '+')
   })
 
   it('uses the full viewport without creating a simulated device frame', () => {

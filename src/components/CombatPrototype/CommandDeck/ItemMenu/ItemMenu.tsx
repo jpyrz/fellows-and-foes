@@ -5,6 +5,7 @@ import styles from './ItemMenu.module.scss'
 interface ItemMenuProps {
   inventoryItems: { item: ItemDefinition; quantity: number }[]
   isItemAvailable: (item: ItemDefinition) => boolean
+  itemUsedThisTurn: boolean
   onSelectItem: (itemId: string) => void
   selectedItemId?: string
 }
@@ -12,6 +13,7 @@ interface ItemMenuProps {
 export function ItemMenu({
   inventoryItems,
   isItemAvailable,
+  itemUsedThisTurn,
   onSelectItem,
   selectedItemId,
 }: ItemMenuProps) {
@@ -27,7 +29,7 @@ export function ItemMenu({
             className={styles.itemSlot}
             data-cy={`item-${stack.item.id}`}
             data-selected={selectedItemId === stack.item.id || undefined}
-            disabled={!isItemAvailable(stack.item)}
+            disabled={itemUsedThisTurn || !isItemAvailable(stack.item)}
             onClick={() => onSelectItem(stack.item.id)}
           >
             <img src={stack.item.icon} alt="" />

@@ -15,6 +15,7 @@ interface CommandDeckProps {
   activeCombatant?: Combatant
   inventoryItems: { item: ItemDefinition; quantity: number }[]
   isItemAvailable: (item: ItemDefinition) => boolean
+  itemUsedThisTurn: boolean
   isTargeting: boolean
   isSkillAvailable: (skill: Skill) => boolean
   onCancelSelection: () => void
@@ -31,6 +32,7 @@ export function CommandDeck({
   activeCombatant,
   inventoryItems,
   isItemAvailable,
+  itemUsedThisTurn,
   isTargeting,
   isSkillAvailable,
   onCancelSelection,
@@ -86,10 +88,16 @@ export function CommandDeck({
             <button
               type="button"
               data-active={activeView === 'items' || undefined}
+              data-used={itemUsedThisTurn || undefined}
+              disabled={itemUsedThisTurn}
               onClick={() => onChangeView('items')}
             >
               Items
-              <span>{activeCombatant.inventory.length}/4</span>
+              <span>
+                {itemUsedThisTurn
+                  ? 'Used'
+                  : `${activeCombatant.inventory.length}/4`}
+              </span>
             </button>
           </div>
 
@@ -117,6 +125,7 @@ export function CommandDeck({
             <ItemMenu
               inventoryItems={inventoryItems}
               isItemAvailable={isItemAvailable}
+              itemUsedThisTurn={itemUsedThisTurn}
               onSelectItem={onSelectItem}
               selectedItemId={selectedItem?.id}
             />

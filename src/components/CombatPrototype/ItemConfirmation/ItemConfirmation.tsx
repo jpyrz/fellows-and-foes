@@ -45,7 +45,7 @@ export function ItemConfirmation({
           {actor.name} → {target.name}
         </Text>
         <Text className={styles.warning} size="xs" fw={800}>
-          Using this item consumes your turn and one item.
+          This consumes one item. You may still use an ability this turn.
         </Text>
         <div className={styles.actions}>
           <Button color="gray" variant="subtle" onClick={onBack}>

@@ -53,6 +53,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   const [commandView, setCommandView] = useState<'abilities' | 'items'>(
     'abilities',
   )
+  const [itemUsedThisTurn, setItemUsedThisTurn] = useState(false)
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null)
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [isTargeting, setIsTargeting] = useState(false)
@@ -71,6 +72,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   } | null>(null)
   const [boardAction, setBoardAction] = useState<{
     actorId: string
+    endsTurn: boolean
     effect: ActionEffectType
     phase: 'windup' | 'impact'
     resolvedState: CombatState
@@ -122,6 +124,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     const nextCombatant = getActiveCombatant(nextState)
 
     setCommandView('abilities')
+    setItemUsedThisTurn(false)
     setSelectedSkillId(null)
     setSelectedItemId(null)
     setIsTargeting(false)
@@ -154,6 +157,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     const timeout = window.setTimeout(() => {
       setBoardAction({
         actorId: resolution.actorId,
+        endsTurn: true,
         effect: resolution.skill.effect.type,
         phase: 'windup',
         resolvedState: resolution.state,
@@ -197,8 +201,10 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
       const resolvedState = boardAction.resolvedState
       setBoardAction(null)
       resolvingAction.current = false
-      if (resolvedState.status === 'active') {
+      if (resolvedState.status === 'active' && boardAction.endsTurn) {
         advanceToNextTurn(resolvedState)
+      } else if (resolvedState.status === 'active') {
+        setCommandView('abilities')
       }
     }, boardAction.phase === 'windup' ? BOARD_ACTION_WINDUP_MS : BOARD_ACTION_IMPACT_MS)
     return () => window.clearTimeout(timeout)
@@ -215,6 +221,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   function isItemAvailable(item: ItemDefinition) {
     return Boolean(
       activeCombatant &&
+        !itemUsedThisTurn &&
         item.category === 'battle' &&
         getValidItemTargets(combat, activeCombatant.id, item.id).length > 0,
     )
@@ -358,6 +365,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
 
     setBoardAction({
       actorId: actor.id,
+      endsTurn: true,
       effect: skill.effect.type,
       phase: 'windup',
       resolvedState: resolution.state,
@@ -375,6 +383,10 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   }
 
   function selectItem(itemId: string) {
+    if (itemUsedThisTurn) {
+      return
+    }
+
     setInspectedCombatantId(null)
     setCommandView('items')
     setSelectedSkillId(null)
@@ -389,6 +401,10 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   }
 
   function changeCommandView(view: 'abilities' | 'items') {
+    if (view === 'items' && itemUsedThisTurn) {
+      return
+    }
+
     cancelSelection()
     setCommandView(view)
   }
@@ -440,12 +456,15 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
 
     setBoardAction({
       actorId: activeCombatant.id,
+      endsTurn: false,
       effect: resolution.item.effect.type,
       phase: 'windup',
       resolvedState: resolution.state,
       targetId: pendingItem.targetId,
     })
     setPendingItem(null)
+    setCommandView('abilities')
+    setItemUsedThisTurn(true)
     setSelectedItemId(null)
     setIsTargeting(false)
   }
@@ -458,6 +477,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     setTurnAnnouncement(null)
     setInspectedCombatantId(null)
     setCommandView('abilities')
+    setItemUsedThisTurn(false)
     setSelectedItemId(null)
     setSelectedSkillId(null)
     setIsTargeting(false)
@@ -510,6 +530,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
             activeCombatant?.team === 'heroes' ? activeCombatant : undefined
           }
           inventoryItems={inventoryItems}
+          itemUsedThisTurn={itemUsedThisTurn}
           isItemAvailable={isItemAvailable}
           isTargeting={isTargeting}
           isSkillAvailable={isSkillAvailable}
