@@ -3,11 +3,16 @@ import type { CombatStatus } from '../../../game/combat/types'
 import styles from './BattleResult.module.scss'
 
 interface BattleResultProps {
+  actionLabel?: string
   onReset: () => void
   status: Exclude<CombatStatus, 'active'>
 }
 
-export function BattleResult({ onReset, status }: BattleResultProps) {
+export function BattleResult({
+  actionLabel = 'Fight again',
+  onReset,
+  status,
+}: BattleResultProps) {
   const victory = status === 'victory'
 
   return (
@@ -31,7 +36,7 @@ export function BattleResult({ onReset, status }: BattleResultProps) {
           onClick={onReset}
           size="md"
         >
-          Fight again
+          {actionLabel}
         </Button>
       </div>
     </div>

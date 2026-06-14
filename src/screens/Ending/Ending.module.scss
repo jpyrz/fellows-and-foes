@@ -1,0 +1,11 @@
+.ending { display:grid; min-height:calc(100dvh - 8rem); max-width:48rem; margin:0 auto; place-content:center; justify-items:center; padding:clamp(1.5rem,6vw,4rem); border:1px solid #8d754e; color:#30271d; background:radial-gradient(circle at center,rgba(255,255,255,.4),transparent 28rem),repeating-linear-gradient(0deg,rgba(92,66,38,.035) 0,rgba(92,66,38,.035) 1px,transparent 1px,transparent 5px),#d9c9a6; box-shadow:0 2rem 5rem rgba(0,0,0,.45),inset 0 0 3rem rgba(73,49,27,.24); text-align:center; }
+.ending > span,.progress span { color:#715a38; font-size:.68rem; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+.ending h1 { margin:.3rem 0; font-family:Georgia,serif; font-size:clamp(3rem,10vw,6rem); line-height:.9; }
+.flourish { margin:1rem; color:#715a38; }
+.ending > p { max-width:35rem; font-family:Georgia,serif; font-size:1.1rem; line-height:1.8; }
+.party { display:flex; justify-content:center; gap:.7rem; margin:1.5rem 0; }
+.party div { display:grid; gap:.25rem; }
+.party img { width:5rem; height:5.3rem; object-fit:cover; border:2px solid #715a38; background:#eee2c7; }
+.party strong { font-size:.75rem; }
+.progress { display:grid; gap:.25rem; margin-bottom:1.4rem; padding:1rem 1.5rem; border:1px solid rgba(68,50,29,.25); }
+.progress small { color:#695a48; }

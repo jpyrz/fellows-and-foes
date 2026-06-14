@@ -3,7 +3,7 @@ import { useFellowsTheme } from '../../../theme/themeContext'
 import { themeIds } from '../../../theme/themes'
 import styles from './GameHeader.module.scss'
 
-export function GameHeader() {
+export function GameHeader({ campaignTitle = 'Road to Bellweather' }) {
   const { setThemeId, themeId, themeOptions } = useFellowsTheme()
 
   return (
@@ -16,7 +16,7 @@ export function GameHeader() {
           <Text size="9px" c="brand" tt="uppercase" fw={900}>
             Campaign
           </Text>
-          <Text className={styles.campaignTitle}>Road to Bellweather</Text>
+          <Text className={styles.campaignTitle}>{campaignTitle}</Text>
         </div>
       </Group>
 
@@ -34,7 +34,7 @@ export function GameHeader() {
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Campaign</Menu.Label>
-          <Menu.Item disabled>Road to Bellweather</Menu.Item>
+          <Menu.Item disabled>{campaignTitle}</Menu.Item>
           <Menu.Divider />
           <Menu.Label>Color theme</Menu.Label>
           {themeIds.map((optionId) => {

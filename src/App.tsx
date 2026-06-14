@@ -1,7 +1,31 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { CombatPrototype } from './components/CombatPrototype/CombatPrototype'
+import { CampaignBattle } from './screens/CampaignBattle/CampaignBattle'
+import { CampaignMap } from './screens/CampaignMap/CampaignMap'
+import { CampaignSetup } from './screens/CampaignSetup/CampaignSetup'
+import { CharacterCreation } from './screens/CharacterCreation/CharacterCreation'
+import { Checkpoint } from './screens/Checkpoint/Checkpoint'
+import { Dashboard } from './screens/Dashboard/Dashboard'
+import { Ending } from './screens/Ending/Ending'
+import { StoryScreen } from './screens/StoryScreen/StoryScreen'
 
 function App() {
-  return <CombatPrototype />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/character/create" element={<CharacterCreation />} />
+        <Route path="/campaign/new" element={<CampaignSetup />} />
+        <Route path="/campaign/:runId" element={<StoryScreen />} />
+        <Route path="/campaign/:runId/map" element={<CampaignMap />} />
+        <Route path="/campaign/:runId/battle" element={<CampaignBattle />} />
+        <Route path="/campaign/:runId/checkpoint" element={<Checkpoint />} />
+        <Route path="/campaign/:runId/ending" element={<Ending />} />
+        <Route path="/battle-lab" element={<CombatPrototype />} />
+        <Route path="*" element={<Dashboard />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App

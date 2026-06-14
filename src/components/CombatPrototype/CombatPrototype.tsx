@@ -34,7 +34,10 @@ import { TurnAnnouncement } from './TurnAnnouncement/TurnAnnouncement'
 import styles from './CombatPrototype.module.scss'
 
 interface CombatPrototypeProps {
+  campaignTitle?: string
+  encounterTitle?: string
   initialState?: CombatState
+  onComplete?: (state: CombatState) => void
 }
 
 const ROLL_DURATION_MS = 700
@@ -46,7 +49,12 @@ function delay(duration: number) {
   return new Promise((resolve) => window.setTimeout(resolve, duration))
 }
 
-export function CombatPrototype({ initialState }: CombatPrototypeProps) {
+export function CombatPrototype({
+  campaignTitle,
+  encounterTitle,
+  initialState,
+  onComplete,
+}: CombatPrototypeProps) {
   const [combat, setCombat] = useState(
     () => initialState ?? createInitialCombatState(),
   )
@@ -497,7 +505,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           pendingAction || pendingItem || turnAnnouncement ? true : undefined
         }
       >
-        <GameHeader />
+        <GameHeader campaignTitle={campaignTitle} />
         <EncounterHud
           activeCombatantId={activeCombatant?.id}
           combatants={combat.combatants}
@@ -506,6 +514,10 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           round={combat.round}
           status={combat.status}
           turnOrder={combat.turnOrder}
+          campaignLabel={
+            campaignTitle ? `${campaignTitle} · Encounter 01` : undefined
+          }
+          encounterTitle={encounterTitle}
         />
         <Battlefield
           activeCombatantId={activeCombatant?.id}
@@ -585,7 +597,11 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
       {combat.status !== 'active' &&
         !boardAction &&
         !turnAnnouncement && (
-        <BattleResult onReset={resetCombat} status={combat.status} />
+        <BattleResult
+          actionLabel={onComplete ? 'Continue campaign' : undefined}
+          onReset={() => (onComplete ? onComplete(combat) : resetCombat())}
+          status={combat.status}
+        />
       )}
 
       <CombatLog entries={combat.log} onClose={closeLog} opened={logOpened} />

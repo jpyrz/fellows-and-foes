@@ -14,6 +14,8 @@ interface EncounterHudProps {
   round: number
   status: CombatStatus
   turnOrder: string[]
+  campaignLabel?: string
+  encounterTitle?: string
 }
 
 export function EncounterHud({
@@ -24,16 +26,18 @@ export function EncounterHud({
   round,
   status,
   turnOrder,
+  campaignLabel = 'Old Road · Encounter 01',
+  encounterTitle = 'Smoke in the Mire',
 }: EncounterHudProps) {
   return (
     <section className={styles.hud}>
       <div className={styles.summary}>
         <div className={styles.encounter}>
           <Text size="9px" c="brand" fw={900} tt="uppercase">
-            Old Road · Encounter 01
+            {campaignLabel}
           </Text>
           <Text className={styles.title} fw={900}>
-            Smoke in the Mire
+            {encounterTitle}
           </Text>
         </div>
 

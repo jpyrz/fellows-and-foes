@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 
 import { CombatPrototype } from './components/CombatPrototype/CombatPrototype'
+import App from './App'
 import {
   createInitialCombatState,
   getValidItemTargets,
@@ -404,5 +405,107 @@ describe('<CombatPrototype />', () => {
       )
     })
     cy.get('button[aria-label="Theme: Ember"]').should('be.visible')
+  })
+})
+
+describe('campaign alpha flow', () => {
+  beforeEach(() => {
+    cy.viewport(430, 900)
+    cy.clearLocalStorage()
+    window.history.replaceState({}, '', '/')
+  })
+
+  it('creates a persistent fellow and reaches the campaign battle', () => {
+    let campaignRunId = ''
+    let playerId = ''
+
+    cy.mount(<App />)
+
+    cy.get('[data-cy="create-character"]').click()
+    cy.get('[data-cy="character-name"]').type('Mara')
+    cy.get('[data-cy="creation-next"]').click()
+    cy.get('[data-cy="creation-next"]').click()
+    cy.get('[data-cy="creation-next"]').click()
+    cy.get('[data-cy="starter-skill-iron-strike"]').click()
+    cy.get('[data-cy="starter-skill-shield-bash"]').click()
+    cy.get('[data-cy="starter-skill-quick-shot"]').click()
+    cy.get('[data-cy="creation-next"]').click()
+    cy.get('[data-cy="finish-character"]').click()
+
+    cy.contains('h1', 'Mara').should('be.visible')
+    cy.get('[data-cy="start-campaign"]').click()
+    cy.get('[data-cy="companion-brann"]').click()
+    cy.get('[data-cy="companion-elowen"]').click()
+    cy.get('[data-cy="begin-campaign"]').click()
+
+    cy.contains('h1', 'The Road Remembers').should('be.visible')
+    cy.get('[data-cy="scene-action-enter-gaol"]').click()
+    cy.contains('[role="dialog"] button', 'Continue').click()
+    cy.contains('h1', 'Flooded Gaol').should('be.visible')
+
+    cy.get('[data-cy="scene-action-wade-through-breach"]').click()
+    cy.contains('[role="dialog"] button', 'Continue').click()
+    cy.get('[data-cy="map-node-smoke-in-the-mire"]').click()
+    cy.contains('h1', 'Smoke in the Mire').should('be.visible')
+    cy.window().then((window) => {
+      const stored = JSON.parse(
+        window.localStorage.getItem('fellows-and-foes-save')!,
+      )
+      expect(stored.activeRuns[0].party[0].health).to.equal(20)
+    })
+    cy.get('[data-cy="scene-action-begin-smoke-battle"]').click()
+
+    cy.get('[data-cy="combat-status"]').should('contain.text', 'Round 1')
+    cy.contains('Smoke in the Mire').should('be.visible')
+    cy.contains('Mara').should('be.visible')
+
+    // Combat victory/defeat behavior is covered above. Resume at the authored
+    // victory state here to verify the remaining campaign handoff.
+    cy.window().then((window) => {
+      const stored = JSON.parse(
+        window.localStorage.getItem('fellows-and-foes-save')!,
+      )
+      const run = stored.activeRuns[0]
+      campaignRunId = run.id
+      playerId = run.characterId
+      run.sceneId = 'after-battle'
+      delete run.currentEncounterId
+      run.claimedRewardIds.push('boss-smoke-in-the-mire')
+      stored.character.xp = 60
+      window.localStorage.setItem(
+        'fellows-and-foes-save',
+        JSON.stringify(stored),
+      )
+      window.history.replaceState({}, '', `/campaign/${run.id}`)
+    })
+    cy.mount(<App />)
+
+    cy.contains('h1', 'The Wayfarer Shrine').should('be.visible')
+    cy.get('[data-cy="scene-action-rest-at-shrine"]').click()
+    cy.url().should('include', '/checkpoint')
+
+    cy.then(() => {
+      cy.get(
+        `[data-cy="checkpoint-skill-${playerId}-ember-lance"]`,
+      ).click()
+      cy.get('[data-cy="checkpoint-skill-brann-guardian-oath"]').click()
+      cy.get('[data-cy="checkpoint-skill-elowen-venom-cut"]').click()
+    })
+    cy.get('[data-cy="claim-checkpoint"]').click()
+
+    cy.contains('h1', 'A Road Reopened').should('be.visible')
+    cy.contains('Mara · Level 2 · 100 XP').should('be.visible')
+    cy.get('[data-cy="complete-campaign"]').click()
+
+    cy.contains('h2', 'Completed chronicles').should('be.visible')
+    cy.contains('First Contact completed').should('be.visible')
+    cy.window().then((window) => {
+      const stored = JSON.parse(
+        window.localStorage.getItem('fellows-and-foes-save')!,
+      )
+      expect(stored.activeRuns).to.have.length(0)
+      expect(stored.completedRuns[0].id).to.equal(campaignRunId)
+      expect(stored.character.unlockedSkillIds).to.include('ember-lance')
+    })
   })
 })
