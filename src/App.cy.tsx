@@ -58,9 +58,10 @@ describe('<CombatPrototype />', () => {
       'contain.text',
       'Nyra uses Quick Shot',
     )
-    cy.get('[data-feedback="damage"]').should('exist')
+    cy.get('[data-feedback]').should('not.exist')
     cy.get('[data-cy="hero-action-overlay"]').should('contain.text', 'Hit')
     cy.get('[data-cy="hero-action-overlay"]').should('not.exist')
+    cy.get('[data-feedback]').should('not.exist')
     cy.get('[data-cy="turn-announcement"]')
       .should('be.visible')
       .and('have.attr', 'data-team', 'enemies')
@@ -72,7 +73,9 @@ describe('<CombatPrototype />', () => {
       .and('contain.text', 'Enemy turn')
       .and('contain.text', 'Ashfang')
       .and('contain.text', 'Elowen')
+    cy.get('[data-feedback]').should('not.exist')
     cy.get('[data-cy="enemy-turn-overlay"]').should('not.exist')
+    cy.get('[data-feedback]').should('not.exist')
     cy.get('[data-cy="turn-announcement"]')
       .should('be.visible')
       .and('have.attr', 'data-team', 'heroes')

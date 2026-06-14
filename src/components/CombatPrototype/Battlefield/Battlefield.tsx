@@ -8,6 +8,7 @@ interface BattlefieldProps {
   activeCombatantId?: string
   enemies: Combatant[]
   heroes: Combatant[]
+  isFeedbackSuppressed: boolean
   isTargeting: boolean
   inspectedCombatantId: string | null
   onCloseInspection: () => void
@@ -20,6 +21,7 @@ export function Battlefield({
   activeCombatantId,
   enemies,
   heroes,
+  isFeedbackSuppressed,
   isTargeting,
   inspectedCombatantId,
   onCloseInspection,
@@ -42,6 +44,7 @@ export function Battlefield({
               key={enemy.id}
               combatant={enemy}
               isActive={activeCombatantId === enemy.id}
+              isFeedbackSuppressed={isFeedbackSuppressed}
               isTargetable={targetableIds.includes(enemy.id)}
               isTargeting={isTargeting}
               onInspect={onInspect}
@@ -65,6 +68,7 @@ export function Battlefield({
               key={hero.id}
               combatant={hero}
               isActive={activeCombatantId === hero.id}
+              isFeedbackSuppressed={isFeedbackSuppressed}
               isTargetable={targetableIds.includes(hero.id)}
               isTargeting={isTargeting}
               layout="party"

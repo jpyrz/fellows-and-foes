@@ -8,6 +8,7 @@ type CombatFeedback = 'damage' | 'heal' | 'shield' | null
 interface UnitPanelProps {
   combatant: Combatant
   isActive: boolean
+  isFeedbackSuppressed: boolean
   isTargetable: boolean
   isTargeting: boolean
   layout?: 'default' | 'party'
@@ -18,6 +19,7 @@ interface UnitPanelProps {
 export function UnitPanel({
   combatant,
   isActive,
+  isFeedbackSuppressed,
   isTargetable,
   isTargeting,
   layout = 'default',
@@ -33,6 +35,7 @@ export function UnitPanel({
   const previousHealth = useRef(combatant.health)
   const previousShield = useRef(combatant.shield)
   const [feedback, setFeedback] = useState<CombatFeedback>(null)
+  const visibleFeedback = isFeedbackSuppressed ? null : feedback
 
   useEffect(() => {
     let nextFeedback: CombatFeedback = null
@@ -48,6 +51,10 @@ export function UnitPanel({
     previousHealth.current = combatant.health
     previousShield.current = combatant.shield
 
+    if (isFeedbackSuppressed) {
+      return
+    }
+
     if (!nextFeedback) {
       return
     }
@@ -55,7 +62,7 @@ export function UnitPanel({
     setFeedback(nextFeedback)
     const timeout = window.setTimeout(() => setFeedback(null), 700)
     return () => window.clearTimeout(timeout)
-  }, [combatant.health, combatant.shield])
+  }, [combatant.health, combatant.shield, isFeedbackSuppressed])
 
   function handleClick() {
     if (isTargetable) {
@@ -78,7 +85,7 @@ export function UnitPanel({
       className={styles.unit}
       data-active={isActive || undefined}
       data-downed={isDown || undefined}
-      data-feedback={feedback ?? undefined}
+      data-feedback={visibleFeedback ?? undefined}
       data-layout={layout}
       data-targetable={isTargetable || undefined}
       data-targeting={isTargeting || undefined}
@@ -96,11 +103,11 @@ export function UnitPanel({
         {isTargetable && (
           <span className={styles.targetReticle} aria-hidden="true" />
         )}
-        {feedback && (
+        {visibleFeedback && (
           <span className={styles.feedbackLabel}>
-            {feedback === 'damage'
+            {visibleFeedback === 'damage'
               ? 'Hit'
-              : feedback === 'heal'
+              : visibleFeedback === 'heal'
                 ? 'Healed'
                 : 'Shielded'}
           </span>

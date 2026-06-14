@@ -490,6 +490,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           activeCombatantId={activeCombatant?.id}
           enemies={enemies}
           heroes={heroes}
+          isFeedbackSuppressed={Boolean(heroAction || enemyTurn)}
           isTargeting={isTargeting}
           inspectedCombatantId={inspectedCombatantId}
           onCloseInspection={() => setInspectedCombatantId(null)}
