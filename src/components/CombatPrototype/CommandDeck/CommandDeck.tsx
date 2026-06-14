@@ -1,26 +1,44 @@
 import { Button, Text } from '@mantine/core'
-import type { Combatant, Skill } from '../../../game/combat/types'
+import type {
+  Combatant,
+  ItemDefinition,
+  Skill,
+} from '../../../game/combat/types'
+import { ItemDetail } from './ItemDetail/ItemDetail'
+import { ItemMenu } from './ItemMenu/ItemMenu'
 import { SkillDetail } from './SkillDetail/SkillDetail'
 import { SkillMenu } from './SkillMenu/SkillMenu'
 import styles from './CommandDeck.module.scss'
 
 interface CommandDeckProps {
+  activeView: 'abilities' | 'items'
   activeCombatant?: Combatant
+  inventoryItems: { item: ItemDefinition; quantity: number }[]
+  isItemAvailable: (item: ItemDefinition) => boolean
   isTargeting: boolean
   isSkillAvailable: (skill: Skill) => boolean
   onCancelSelection: () => void
+  onChangeView: (view: 'abilities' | 'items') => void
+  onSelectItem: (itemId: string) => void
   onSelectSkill: (skillId: string) => void
   onSkipTurn: () => void
+  selectedItem?: ItemDefinition
   selectedSkill?: Skill
 }
 
 export function CommandDeck({
+  activeView,
   activeCombatant,
+  inventoryItems,
+  isItemAvailable,
   isTargeting,
   isSkillAvailable,
   onCancelSelection,
+  onChangeView,
+  onSelectItem,
   onSelectSkill,
   onSkipTurn,
+  selectedItem,
   selectedSkill,
 }: CommandDeckProps) {
   return (
@@ -57,24 +75,66 @@ export function CommandDeck({
             </Button>
           </div>
 
+          <div className={styles.commandTabs}>
+            <button
+              type="button"
+              data-active={activeView === 'abilities' || undefined}
+              onClick={() => onChangeView('abilities')}
+            >
+              Abilities
+            </button>
+            <button
+              type="button"
+              data-active={activeView === 'items' || undefined}
+              onClick={() => onChangeView('items')}
+            >
+              Items
+              <span>{activeCombatant.inventory.length}/4</span>
+            </button>
+          </div>
+
           <div className={styles.abilityLabel}>
             <Text size="10px" c="dimmed" fw={800} tt="uppercase">
-              {isTargeting ? 'Select a combatant' : 'Abilities'}
+              {isTargeting
+                ? 'Select a combatant'
+                : activeView === 'abilities'
+                  ? 'Abilities'
+                  : 'Battle items'}
             </Text>
             <Text size="10px" c={isTargeting ? 'brand' : 'dimmed'} fw={800}>
               {isTargeting ? 'Valid targets are marked' : 'Tap to inspect'}
             </Text>
           </div>
 
-          <SkillMenu
-            isSkillAvailable={isSkillAvailable}
-            onSelectSkill={onSelectSkill}
-            selectedSkillId={selectedSkill?.id}
-            skills={activeCombatant.skills}
-          />
+          {activeView === 'abilities' ? (
+            <SkillMenu
+              isSkillAvailable={isSkillAvailable}
+              onSelectSkill={onSelectSkill}
+              selectedSkillId={selectedSkill?.id}
+              skills={activeCombatant.skills}
+            />
+          ) : (
+            <ItemMenu
+              inventoryItems={inventoryItems}
+              isItemAvailable={isItemAvailable}
+              onSelectItem={onSelectItem}
+              selectedItemId={selectedItem?.id}
+            />
+          )}
 
           {selectedSkill && (
             <SkillDetail onCancel={onCancelSelection} skill={selectedSkill} />
+          )}
+          {selectedItem && (
+            <ItemDetail
+              item={selectedItem}
+              onCancel={onCancelSelection}
+              quantity={
+                inventoryItems.find(
+                  ({ item }) => item.id === selectedItem.id,
+                )?.quantity ?? 0
+              }
+            />
           )}
         </>
       ) : (

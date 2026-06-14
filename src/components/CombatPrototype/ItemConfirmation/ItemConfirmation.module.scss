@@ -1,0 +1,97 @@
+.overlay {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  padding: 1.25rem;
+  background:
+    radial-gradient(
+      ellipse at 50% 48%,
+      color-mix(in srgb, var(--ff-warning) 14%, transparent),
+      transparent 32rem
+    ),
+    color-mix(in srgb, var(--ff-bg-root) 80%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  inset: 0;
+  place-items: center;
+  animation: overlayIn 360ms ease-out both;
+}
+
+.confirmation {
+  display: grid;
+  width: min(28rem, 100%);
+  justify-items: center;
+  gap: 0.65rem;
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    font-family: Georgia, serif;
+  }
+}
+
+.itemIcon {
+  position: relative;
+  display: grid;
+  width: 7rem;
+  aspect-ratio: 1;
+  margin-block: 0.45rem;
+  place-items: center;
+  border: 1px solid var(--ff-border-strong);
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ff-warning) 25%, transparent),
+      transparent 70%
+    ),
+    color-mix(in srgb, var(--ff-bg-panel) 88%, transparent);
+  box-shadow: 0 0 2.5rem
+    color-mix(in srgb, var(--ff-warning) 22%, transparent);
+
+  img {
+    width: 76%;
+    height: 76%;
+    object-fit: contain;
+  }
+
+  span {
+    position: absolute;
+    right: 0.45rem;
+    bottom: 0.4rem;
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--ff-bg-root);
+    font-size: 0.75rem;
+    font-weight: 1000;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--ff-warning);
+  }
+}
+
+.warning {
+  max-width: 20rem;
+  color: var(--ff-warning);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+
+  button {
+    min-width: 7.5rem;
+  }
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

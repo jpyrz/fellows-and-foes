@@ -1,12 +1,15 @@
 import { Text } from '@mantine/core'
 import { useEffect, useRef, useState } from 'react'
-import type { Combatant } from '../../../../game/combat/types'
+import type {
+  ActionEffectType,
+  Combatant,
+} from '../../../../game/combat/types'
 import styles from './UnitPanel.module.scss'
 
-type CombatFeedback = 'damage' | 'heal' | 'shield' | null
+type CombatFeedback = 'damage' | 'heal' | 'shield' | 'stamina' | null
 
 interface UnitPanelProps {
-  actionEffect?: Combatant['skills'][number]['effect']['type']
+  actionEffect?: ActionEffectType
   actionPhase?: 'windup' | 'impact'
   combatant: Combatant
   isActive: boolean
@@ -40,6 +43,7 @@ export function UnitPanel({
   const isDown = combatant.health === 0
   const previousHealth = useRef(combatant.health)
   const previousShield = useRef(combatant.shield)
+  const previousStamina = useRef(combatant.stamina)
   const [feedback, setFeedback] = useState<CombatFeedback>(null)
 
   useEffect(() => {
@@ -51,10 +55,13 @@ export function UnitPanel({
       nextFeedback = 'heal'
     } else if (combatant.shield > previousShield.current) {
       nextFeedback = 'shield'
+    } else if (combatant.stamina > previousStamina.current) {
+      nextFeedback = 'stamina'
     }
 
     previousHealth.current = combatant.health
     previousShield.current = combatant.shield
+    previousStamina.current = combatant.stamina
 
     if (!nextFeedback) {
       return
@@ -63,7 +70,7 @@ export function UnitPanel({
     setFeedback(nextFeedback)
     const timeout = window.setTimeout(() => setFeedback(null), 700)
     return () => window.clearTimeout(timeout)
-  }, [combatant.health, combatant.shield])
+  }, [combatant.health, combatant.shield, combatant.stamina])
 
   function handleClick() {
     if (isTargetable) {
@@ -114,7 +121,9 @@ export function UnitPanel({
               ? 'Hit'
               : feedback === 'heal'
                 ? 'Healed'
-                : 'Shielded'}
+                : feedback === 'shield'
+                  ? 'Shielded'
+                  : 'Focused'}
           </span>
         )}
       </div>

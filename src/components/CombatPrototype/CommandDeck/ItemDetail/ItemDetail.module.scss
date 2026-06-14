@@ -1,0 +1,123 @@
+.detail {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid var(--ff-border-strong);
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      color-mix(in srgb, var(--ff-warning) 13%, var(--ff-bg-panel)),
+      var(--ff-bg-panel) 9rem
+    );
+  box-shadow:
+    0 1rem 2.5rem color-mix(in srgb, var(--ff-shadow) 68%, transparent),
+    inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
+}
+
+.iconFrame {
+  position: relative;
+  display: grid;
+  width: 4.5rem;
+  height: 4.5rem;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--ff-border-strong);
+  border-radius: 0.7rem;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ff-warning) 28%, transparent),
+      transparent 68%
+    ),
+    var(--ff-bg-panel);
+
+  img {
+    width: 72%;
+    height: 72%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 0.45rem var(--ff-shadow));
+  }
+
+  span {
+    position: absolute;
+    right: 0.25rem;
+    bottom: 0.2rem;
+    display: grid;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--ff-bg-root);
+    font-size: 0.65rem;
+    font-weight: 900;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--ff-warning);
+    box-shadow: 0 0 0 2px var(--ff-bg-panel);
+  }
+}
+
+.copy {
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.55rem;
+
+  span {
+    display: grid;
+  }
+
+  small {
+    color: var(--ff-text-muted);
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--ff-warning);
+    font-size: 0.72rem;
+  }
+}
+
+.actions {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--ff-border);
+}
+
+@media (max-width: 60rem) {
+  .detail {
+    position: fixed;
+    top: 50%;
+    right: 0.9rem;
+    bottom: auto;
+    left: 0.9rem;
+    z-index: 4;
+    padding: 0.7rem;
+    transform: translateY(-50%);
+    box-shadow:
+      0 1rem 2.5rem color-mix(in srgb, var(--ff-shadow) 68%, transparent),
+      inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
+  }
+
+  .iconFrame {
+    width: 4rem;
+    height: 4rem;
+  }
+}

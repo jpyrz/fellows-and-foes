@@ -1,4 +1,5 @@
 import { createCombatants } from './content'
+import { getItemDefinition } from './items'
 import type {
   CombatState,
   CombatStatus,
@@ -7,6 +8,8 @@ import type {
   EnemyActionResolution,
   Effect,
   HeroActionResolution,
+  HeroItemResolution,
+  ItemDefinition,
   LogEntry,
   Skill,
 } from './types'
@@ -284,6 +287,37 @@ function isValidTarget(actor: Combatant, target: Combatant, skill: Skill) {
   return actor.team !== target.team
 }
 
+function isValidItemTarget(
+  actor: Combatant,
+  target: Combatant,
+  item: ItemDefinition,
+) {
+  if (target.health <= 0) {
+    return false
+  }
+
+  if (item.effect.type === 'heal' && target.health === target.maxHealth) {
+    return false
+  }
+
+  if (
+    item.effect.type === 'stamina' &&
+    target.stamina === target.maxStamina
+  ) {
+    return false
+  }
+
+  if (item.target === 'self') {
+    return actor.id === target.id
+  }
+
+  if (item.target === 'ally') {
+    return actor.team === target.team
+  }
+
+  return actor.team !== target.team
+}
+
 function chooseEnemyTarget(state: CombatState, actor: Combatant) {
   const heroes = livingCombatants(state, 'heroes')
 
@@ -406,6 +440,33 @@ export function getValidTargets(
   )
 }
 
+export function getValidItemTargets(
+  state: CombatState,
+  actorId: string,
+  itemId: string,
+) {
+  const actor = getCombatant(state, actorId)
+  const item = getItemDefinition(itemId)
+  const stack = actor?.inventory.find(
+    (candidate) => candidate.itemId === itemId,
+  )
+
+  if (
+    !actor ||
+    actor.team !== 'heroes' ||
+    !item ||
+    item.category !== 'battle' ||
+    !stack ||
+    stack.quantity <= 0
+  ) {
+    return []
+  }
+
+  return state.combatants.filter((target) =>
+    isValidItemTarget(actor, target, item),
+  )
+}
+
 export function performHeroAction(
   state: CombatState,
   skillId: string,
@@ -475,6 +536,92 @@ export function resolveHeroAction(
     rolls,
     message: actionMessage ?? `${actor.name} uses ${skill.name}.`,
   }
+}
+
+export function resolveHeroItem(
+  state: CombatState,
+  itemId: string,
+  targetId: string,
+): HeroItemResolution | null {
+  if (state.status !== 'active') {
+    return null
+  }
+
+  const actor = getActiveCombatant(state)
+  const target = getCombatant(state, targetId)
+  const item = getItemDefinition(itemId)
+  const stack = actor?.inventory.find(
+    (candidate) => candidate.itemId === itemId,
+  )
+
+  if (
+    !actor ||
+    actor.team !== 'heroes' ||
+    !target ||
+    !item ||
+    item.category !== 'battle' ||
+    !stack ||
+    stack.quantity <= 0 ||
+    !isValidItemTarget(actor, target, item)
+  ) {
+    return null
+  }
+
+  let updated = updateCombatant(state, actor.id, (combatant) => ({
+    ...combatant,
+    inventory: combatant.inventory.flatMap((candidate) => {
+      if (candidate.itemId !== itemId) {
+        return [candidate]
+      }
+
+      return candidate.quantity > 1
+        ? [{ ...candidate, quantity: candidate.quantity - 1 }]
+        : []
+    }),
+  }))
+
+  let message: string
+
+  if (item.effect.type === 'damage') {
+    message = `${actor.name} uses ${item.name} on ${target.name} for ${item.effect.amount} damage.`
+    updated = addLog(updated, message, 'hero')
+    updated = applyDamage(
+      updated,
+      getCombatant(updated, target.id)!,
+      item.effect.amount,
+    )
+  } else if (item.effect.type === 'heal') {
+    const healedTo = Math.min(
+      target.maxHealth,
+      target.health + item.effect.amount,
+    )
+    message = `${actor.name} uses ${item.name}. ${target.name} recovers ${healedTo - target.health} health.`
+    updated = updateCombatant(updated, target.id, (combatant) => ({
+      ...combatant,
+      health: healedTo,
+    }))
+    updated = addLog(updated, message, 'hero')
+  } else if (item.effect.type === 'shield') {
+    message = `${actor.name} uses ${item.name}. ${target.name} gains ${item.effect.amount} shield.`
+    updated = updateCombatant(updated, target.id, (combatant) => ({
+      ...combatant,
+      shield: Math.max(combatant.shield, item.effect.amount),
+    }))
+    updated = addLog(updated, message, 'hero')
+  } else {
+    const restoredTo = Math.min(
+      target.maxStamina,
+      target.stamina + item.effect.amount,
+    )
+    message = `${actor.name} uses ${item.name}. ${target.name} recovers ${restoredTo - target.stamina} stamina.`
+    updated = updateCombatant(updated, target.id, (combatant) => ({
+      ...combatant,
+      stamina: restoredTo,
+    }))
+    updated = addLog(updated, message, 'hero')
+  }
+
+  return { state: updated, item, message }
 }
 
 export function advanceCombatTurn(state: CombatState) {

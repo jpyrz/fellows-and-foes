@@ -1,23 +1,26 @@
-import { Text } from '@mantine/core'
-import type { Combatant } from '../../../game/combat/types'
-import { UnitInspector } from './UnitInspector/UnitInspector'
-import { UnitPanel } from './UnitPanel/UnitPanel'
-import styles from './Battlefield.module.scss'
+import { Text } from "@mantine/core";
+import type {
+  ActionEffectType,
+  Combatant,
+} from "../../../game/combat/types";
+import { UnitInspector } from "./UnitInspector/UnitInspector";
+import { UnitPanel } from "./UnitPanel/UnitPanel";
+import styles from "./Battlefield.module.scss";
 
 interface BattlefieldProps {
-  activeCombatantId?: string
-  actionActorId?: string
-  actionEffect?: Combatant['skills'][number]['effect']['type']
-  actionPhase?: 'windup' | 'impact'
-  actionTargetId?: string
-  enemies: Combatant[]
-  heroes: Combatant[]
-  isTargeting: boolean
-  inspectedCombatantId: string | null
-  onCloseInspection: () => void
-  onChooseTarget: (targetId: string) => void
-  onInspect: (combatantId: string) => void
-  targetableIds: string[]
+  activeCombatantId?: string;
+  actionActorId?: string;
+  actionEffect?: ActionEffectType;
+  actionPhase?: "windup" | "impact";
+  actionTargetId?: string;
+  enemies: Combatant[];
+  heroes: Combatant[];
+  isTargeting: boolean;
+  inspectedCombatantId: string | null;
+  onCloseInspection: () => void;
+  onChooseTarget: (targetId: string) => void;
+  onInspect: (combatantId: string) => void;
+  targetableIds: string[];
 }
 
 export function Battlefield({
@@ -35,10 +38,10 @@ export function Battlefield({
   onInspect,
   targetableIds,
 }: BattlefieldProps) {
-  const combatants = [...enemies, ...heroes]
+  const combatants = [...enemies, ...heroes];
   const inspectedCombatant = combatants.find(
     (combatant) => combatant.id === inspectedCombatantId,
-  )
+  );
 
   return (
     <section className={styles.battlefield}>
@@ -64,9 +67,7 @@ export function Battlefield({
       </div>
 
       <div className={styles.versus} aria-label="Fellows versus foes">
-        <span>Fellows</span>
         <strong>VS</strong>
-        <span>Foes</span>
       </div>
 
       <div className={styles.partyLane}>
@@ -98,5 +99,5 @@ export function Battlefield({
         />
       )}
     </section>
-  )
+  );
 }

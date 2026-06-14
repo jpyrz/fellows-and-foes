@@ -4,6 +4,8 @@ export type CombatStatus = 'active' | 'victory' | 'defeat'
 
 export type TargetType = 'enemy' | 'ally' | 'self'
 
+export type ItemCategory = 'battle' | 'field' | 'key'
+
 export type Effect =
   | {
       type: 'damage'
@@ -22,6 +24,26 @@ export type Effect =
       amount: number
     }
 
+export type ItemEffect =
+  | {
+      type: 'damage'
+      amount: number
+    }
+  | {
+      type: 'heal'
+      amount: number
+    }
+  | {
+      type: 'shield'
+      amount: number
+    }
+  | {
+      type: 'stamina'
+      amount: number
+    }
+
+export type ActionEffectType = Effect['type'] | ItemEffect['type']
+
 export interface Skill {
   id: string
   name: string
@@ -31,6 +53,22 @@ export interface Skill {
   target: TargetType
   attackBonus?: number
   effect: Effect
+}
+
+export interface ItemDefinition {
+  id: string
+  name: string
+  description: string
+  icon: string
+  category: ItemCategory
+  target: TargetType
+  effect: ItemEffect
+  maxStack: number
+}
+
+export interface InventoryStack {
+  itemId: string
+  quantity: number
 }
 
 export interface Combatant {
@@ -49,6 +87,7 @@ export interface Combatant {
   shield: number
   staggered: boolean
   skills: Skill[]
+  inventory: InventoryStack[]
   behavior?: string
 }
 
@@ -73,6 +112,12 @@ export interface DiceRoll {
 export interface HeroActionResolution {
   state: CombatState
   rolls: DiceRoll[]
+  message: string
+}
+
+export interface HeroItemResolution {
+  state: CombatState
+  item: ItemDefinition
   message: string
 }
 

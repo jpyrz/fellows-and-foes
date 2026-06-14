@@ -1,7 +1,11 @@
 /// <reference types="cypress" />
 
 import { CombatPrototype } from './components/CombatPrototype/CombatPrototype'
-import { createInitialCombatState } from './game/combat/engine'
+import {
+  createInitialCombatState,
+  getValidItemTargets,
+  resolveHeroItem,
+} from './game/combat/engine'
 
 function resolvePendingAction() {
   cy.get('[data-cy="roll-trigger"]').click()
@@ -286,6 +290,67 @@ describe('<CombatPrototype />', () => {
       'contain.text',
       'Nyra holds position and passes the turn.',
     )
+  })
+
+  it('uses a battle item through targeting and confirmation', () => {
+    cy.mount(<CombatPrototype initialState={createInitialCombatState(553)} />)
+
+    cy.contains('button', 'Items').click()
+    cy.get('[data-cy="item-healing-draught"]').should('be.disabled')
+    cy.get('[data-cy="item-ember-flask"]')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Ember Flask, quantity 1')
+      .click()
+    cy.get('[data-cy="item-detail"]')
+      .should('contain.text', '5 damage')
+      .and('contain.text', 'Owned')
+
+    cy.get('[data-cy="target-ashfang"]').click()
+    cy.get('[data-cy="item-confirmation"]')
+      .should('be.visible')
+      .and('contain.text', 'consumes your turn and one item')
+    cy.contains('button', 'Back').click()
+    cy.get('[data-cy="item-confirmation"]').should('not.exist')
+    cy.get('[data-cy="ashfang-health"]').should('contain.text', '24/24')
+
+    cy.get('[data-cy="target-ashfang"]').click()
+    cy.contains('button', 'Use item').click()
+    cy.get('[data-action-actor][data-action-effect="damage"]').should(
+      'contain',
+      'Nyra',
+    )
+    cy.get('[data-action-target][data-feedback="damage"]')
+      .should('contain', 'Ashfang')
+      .and('have.attr', 'data-action-phase', 'impact')
+    cy.get('[data-cy="ashfang-health"]').should('contain.text', '19/24')
+    cy.get('[data-cy="turn-announcement"]').should(
+      'have.attr',
+      'data-team',
+      'enemies',
+    )
+  })
+
+  it('consumes item stacks and enforces item target rules', () => {
+    const state = createInitialCombatState(553)
+
+    expect(getValidItemTargets(state, 'nyra', 'healing-draught')).to.have
+      .length(0)
+    expect(getValidItemTargets(state, 'nyra', 'ember-flask')).to.have.length(
+      2,
+    )
+
+    const resolution = resolveHeroItem(state, 'ember-flask', 'ashfang')
+    expect(resolution).not.to.equal(null)
+    expect(
+      resolution?.state.combatants.find(
+        (combatant) => combatant.id === 'ashfang',
+      )?.health,
+    ).to.equal(19)
+    expect(
+      resolution?.state.combatants
+        .find((combatant) => combatant.id === 'nyra')
+        ?.inventory.some((stack) => stack.itemId === 'ember-flask'),
+    ).to.equal(false)
   })
 
   it('keeps the skip turn control visible on compact screens', () => {

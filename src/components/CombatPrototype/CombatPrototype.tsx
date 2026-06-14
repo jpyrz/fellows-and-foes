@@ -4,14 +4,19 @@ import {
   advanceCombatTurn,
   createInitialCombatState,
   getActiveCombatant,
+  getValidItemTargets,
   getValidTargets,
   passHeroTurn,
   resolveEnemyAction,
   resolveHeroAction,
+  resolveHeroItem,
 } from '../../game/combat/engine'
+import { getItemDefinition } from '../../game/combat/items'
 import type {
+  ActionEffectType,
   CombatState,
   HeroActionResolution,
+  ItemDefinition,
   Skill,
 } from '../../game/combat/types'
 import {
@@ -24,6 +29,7 @@ import { CombatLog } from './CombatLog/CombatLog'
 import { CommandDeck } from './CommandDeck/CommandDeck'
 import { EncounterHud } from './EncounterHud/EncounterHud'
 import { GameHeader } from './GameHeader/GameHeader'
+import { ItemConfirmation } from './ItemConfirmation/ItemConfirmation'
 import { TurnAnnouncement } from './TurnAnnouncement/TurnAnnouncement'
 import styles from './CombatPrototype.module.scss'
 
@@ -44,7 +50,11 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   const [combat, setCombat] = useState(
     () => initialState ?? createInitialCombatState(),
   )
+  const [commandView, setCommandView] = useState<'abilities' | 'items'>(
+    'abilities',
+  )
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null)
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [isTargeting, setIsTargeting] = useState(false)
   const [inspectedCombatantId, setInspectedCombatantId] = useState<
     string | null
@@ -55,9 +65,13 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     skillId: string
     targetId: string
   } | null>(null)
+  const [pendingItem, setPendingItem] = useState<{
+    itemId: string
+    targetId: string
+  } | null>(null)
   const [boardAction, setBoardAction] = useState<{
     actorId: string
-    effect: Skill['effect']['type']
+    effect: ActionEffectType
     phase: 'windup' | 'impact'
     resolvedState: CombatState
     targetId: string
@@ -79,10 +93,22 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
   const selectedSkill = activeCombatant?.skills.find(
     (skill) => skill.id === selectedSkillId,
   )
+  const selectedItem = selectedItemId
+    ? getItemDefinition(selectedItemId)
+    : undefined
+  const inventoryItems =
+    activeCombatant?.team === 'heroes'
+      ? activeCombatant.inventory.flatMap((stack) => {
+          const item = getItemDefinition(stack.itemId)
+          return item ? [{ item, quantity: stack.quantity }] : []
+        })
+      : []
   const validTargets =
     activeCombatant && selectedSkillId
       ? getValidTargets(combat, activeCombatant.id, selectedSkillId)
-      : []
+      : activeCombatant && selectedItemId
+        ? getValidItemTargets(combat, activeCombatant.id, selectedItemId)
+        : []
 
   useEffect(
     () => () => {
@@ -95,6 +121,10 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     const nextState = advanceCombatTurn(state)
     const nextCombatant = getActiveCombatant(nextState)
 
+    setCommandView('abilities')
+    setSelectedSkillId(null)
+    setSelectedItemId(null)
+    setIsTargeting(false)
     setCombat(nextState)
     if (nextState.status === 'active' && nextCombatant) {
       setTurnAnnouncement({
@@ -108,6 +138,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     if (
       combat.status !== 'active' ||
       pendingAction ||
+      pendingItem ||
       boardAction ||
       turnAnnouncement ||
       activeCombatant?.team !== 'enemies'
@@ -135,6 +166,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     boardAction,
     combat,
     pendingAction,
+    pendingItem,
     turnAnnouncement,
   ])
 
@@ -180,11 +212,17 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     )
   }
 
+  function isItemAvailable(item: ItemDefinition) {
+    return Boolean(
+      activeCombatant &&
+        item.category === 'battle' &&
+        getValidItemTargets(combat, activeCombatant.id, item.id).length > 0,
+    )
+  }
+
   function chooseTarget(targetId: string) {
     if (
       !isTargeting ||
-      !selectedSkillId ||
-      !selectedSkill ||
       !activeCombatant ||
       resolvingAction.current
     ) {
@@ -203,6 +241,17 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     }
 
     resolvingAction.current = true
+
+    if (selectedItemId && selectedItem) {
+      setPendingItem({ itemId: selectedItemId, targetId })
+      return
+    }
+
+    if (!selectedSkillId || !selectedSkill) {
+      resolvingAction.current = false
+      return
+    }
+
     let rollSides: number[] = []
 
     if (selectedSkill.effect.type === 'damage') {
@@ -319,13 +368,29 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
 
   function selectSkill(skillId: string) {
     setInspectedCombatantId(null)
+    setCommandView('abilities')
+    setSelectedItemId(null)
     setSelectedSkillId(skillId)
+    setIsTargeting(true)
+  }
+
+  function selectItem(itemId: string) {
+    setInspectedCombatantId(null)
+    setCommandView('items')
+    setSelectedSkillId(null)
+    setSelectedItemId(itemId)
     setIsTargeting(true)
   }
 
   function cancelSelection() {
     setSelectedSkillId(null)
+    setSelectedItemId(null)
     setIsTargeting(false)
+  }
+
+  function changeCommandView(view: 'abilities' | 'items') {
+    cancelSelection()
+    setCommandView(view)
   }
 
   function skipTurn() {
@@ -351,6 +416,40 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     resolvingAction.current = false
   }
 
+  function cancelPendingItem() {
+    setPendingItem(null)
+    resolvingAction.current = false
+  }
+
+  function confirmPendingItem() {
+    if (!pendingItem || !activeCombatant) {
+      return
+    }
+
+    const resolution = resolveHeroItem(
+      combat,
+      pendingItem.itemId,
+      pendingItem.targetId,
+    )
+
+    if (!resolution) {
+      setPendingItem(null)
+      resolvingAction.current = false
+      return
+    }
+
+    setBoardAction({
+      actorId: activeCombatant.id,
+      effect: resolution.item.effect.type,
+      phase: 'windup',
+      resolvedState: resolution.state,
+      targetId: pendingItem.targetId,
+    })
+    setPendingItem(null)
+    setSelectedItemId(null)
+    setIsTargeting(false)
+  }
+
   function resetCombat() {
     actionToken.current += 1
     resolvingAction.current = false
@@ -358,6 +457,8 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     setBoardAction(null)
     setTurnAnnouncement(null)
     setInspectedCombatantId(null)
+    setCommandView('abilities')
+    setSelectedItemId(null)
     setSelectedSkillId(null)
     setIsTargeting(false)
     setPendingAction(null)
@@ -368,10 +469,12 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
       <div
         className={styles.gameFrame}
         inert={
-          pendingAction || boardAction || turnAnnouncement ? true : undefined
+          pendingAction || pendingItem || boardAction || turnAnnouncement
+            ? true
+            : undefined
         }
         aria-hidden={
-          pendingAction || turnAnnouncement ? true : undefined
+          pendingAction || pendingItem || turnAnnouncement ? true : undefined
         }
       >
         <GameHeader />
@@ -402,14 +505,20 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           }
         />
         <CommandDeck
+          activeView={commandView}
           activeCombatant={
             activeCombatant?.team === 'heroes' ? activeCombatant : undefined
           }
+          inventoryItems={inventoryItems}
+          isItemAvailable={isItemAvailable}
           isTargeting={isTargeting}
           isSkillAvailable={isSkillAvailable}
           onCancelSelection={cancelSelection}
+          onChangeView={changeCommandView}
+          onSelectItem={selectItem}
           onSelectSkill={selectSkill}
           onSkipTurn={skipTurn}
+          selectedItem={selectedItem}
           selectedSkill={selectedSkill}
         />
       </div>
@@ -420,6 +529,27 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           onContinue={continuePendingAction}
           onRoll={rollPendingAction}
           sequence={pendingAction.sequence}
+        />
+      )}
+
+      {pendingItem &&
+        activeCombatant &&
+        getItemDefinition(pendingItem.itemId) && (
+        <ItemConfirmation
+          actor={activeCombatant}
+          item={getItemDefinition(pendingItem.itemId)}
+          onBack={cancelPendingItem}
+          onConfirm={confirmPendingItem}
+          quantity={
+            activeCombatant.inventory.find(
+              (stack) => stack.itemId === pendingItem.itemId,
+            )?.quantity ?? 0
+          }
+          target={
+            combat.combatants.find(
+              (combatant) => combatant.id === pendingItem.targetId,
+            )!
+          }
         />
       )}
 

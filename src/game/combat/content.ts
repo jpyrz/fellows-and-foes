@@ -135,6 +135,10 @@ export function createCombatants(): Combatant[] {
       shield: 0,
       staggered: false,
       skills: [quickShot, twinStrike, evasiveGuard],
+      inventory: [
+        { itemId: 'healing-draught', quantity: 2 },
+        { itemId: 'ember-flask', quantity: 1 },
+      ],
     },
     {
       id: 'ashfang',
@@ -152,6 +156,7 @@ export function createCombatants(): Combatant[] {
       shield: 0,
       staggered: false,
       skills: [pounce],
+      inventory: [],
       behavior: 'Pounces on the living hero with the lowest health.',
     },
     {
@@ -170,6 +175,10 @@ export function createCombatants(): Combatant[] {
       shield: 0,
       staggered: false,
       skills: [arcBolt, mend, aegis],
+      inventory: [
+        { itemId: 'guard-tonic', quantity: 1 },
+        { itemId: 'focus-elixir', quantity: 2 },
+      ],
     },
     {
       id: 'mireling',
@@ -187,6 +196,7 @@ export function createCombatants(): Combatant[] {
       shield: 0,
       staggered: false,
       skills: [mireSlam],
+      inventory: [],
       behavior: 'Slams the living hero with the most health.',
     },
     {
@@ -205,6 +215,10 @@ export function createCombatants(): Combatant[] {
       shield: 0,
       staggered: false,
       skills: [ironStrike, shieldBash, secondWind],
+      inventory: [
+        { itemId: 'healing-draught', quantity: 1 },
+        { itemId: 'ember-flask', quantity: 1 },
+      ],
     },
   ]
 }
