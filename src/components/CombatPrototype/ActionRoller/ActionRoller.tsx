@@ -105,13 +105,18 @@ export function ActionRoller({
               disabled={sequence.phase === 'rolling'}
               onClick={onRoll}
             >
-              {sequence.phase === 'rolling'
-                ? hasDice
-                  ? rollingValue
-                  : '◆'
-                : hasDice
-                  ? `d${primarySides}`
-                  : '◆'}
+              {hasDice ? (
+                <>
+                  <img src="/assets/ui/d20.svg" alt="" />
+                  <span>
+                    {sequence.phase === 'rolling'
+                      ? rollingValue
+                      : `d${primarySides}`}
+                  </span>
+                </>
+              ) : (
+                <span className={styles.sigil}>◆</span>
+              )}
             </UnstyledButton>
             <Text size="xs" c="dimmed">
               {sequence.phase === 'ready'
@@ -147,7 +152,14 @@ export function ActionRoller({
                   : 'Action invoked'
               }
             >
-              {hasDice ? primaryRoll?.result : '◆'}
+              {hasDice ? (
+                <>
+                  <img src="/assets/ui/d20.svg" alt="" />
+                  <span>{primaryRoll?.result}</span>
+                </>
+              ) : (
+                <span className={styles.sigil}>◆</span>
+              )}
             </div>
             <div
               className={styles.verdict}

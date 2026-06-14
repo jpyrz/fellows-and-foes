@@ -6,9 +6,12 @@ import styles from './Battlefield.module.scss'
 
 interface BattlefieldProps {
   activeCombatantId?: string
+  actionActorId?: string
+  actionEffect?: Combatant['skills'][number]['effect']['type']
+  actionPhase?: 'windup' | 'impact'
+  actionTargetId?: string
   enemies: Combatant[]
   heroes: Combatant[]
-  isFeedbackSuppressed: boolean
   isTargeting: boolean
   inspectedCombatantId: string | null
   onCloseInspection: () => void
@@ -19,9 +22,12 @@ interface BattlefieldProps {
 
 export function Battlefield({
   activeCombatantId,
+  actionActorId,
+  actionEffect,
+  actionPhase,
+  actionTargetId,
   enemies,
   heroes,
-  isFeedbackSuppressed,
   isTargeting,
   inspectedCombatantId,
   onCloseInspection,
@@ -42,9 +48,12 @@ export function Battlefield({
           {enemies.map((enemy) => (
             <UnitPanel
               key={enemy.id}
+              actionEffect={actionEffect}
+              actionPhase={actionPhase}
               combatant={enemy}
               isActive={activeCombatantId === enemy.id}
-              isFeedbackSuppressed={isFeedbackSuppressed}
+              isActionActor={actionActorId === enemy.id}
+              isActionTarget={actionTargetId === enemy.id}
               isTargetable={targetableIds.includes(enemy.id)}
               isTargeting={isTargeting}
               onInspect={onInspect}
@@ -66,9 +75,12 @@ export function Battlefield({
           {heroes.map((hero) => (
             <UnitPanel
               key={hero.id}
+              actionEffect={actionEffect}
+              actionPhase={actionPhase}
               combatant={hero}
               isActive={activeCombatantId === hero.id}
-              isFeedbackSuppressed={isFeedbackSuppressed}
+              isActionActor={actionActorId === hero.id}
+              isActionTarget={actionTargetId === hero.id}
               isTargetable={targetableIds.includes(hero.id)}
               isTargeting={isTargeting}
               layout="party"

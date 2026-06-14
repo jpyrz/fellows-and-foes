@@ -102,8 +102,8 @@ const pounce: Skill = {
   icon: '/assets/icons/combatants/ashfang.svg',
   cost: 0,
   target: 'enemy',
-  attackBonus: 5,
-  effect: { type: 'damage', die: 6, bonus: 2 },
+  attackBonus: 6,
+  effect: { type: 'damage', die: 8, bonus: 2 },
 }
 
 const mireSlam: Skill = {
@@ -113,8 +113,8 @@ const mireSlam: Skill = {
   icon: '/assets/icons/combatants/mireling.svg',
   cost: 0,
   target: 'enemy',
-  attackBonus: 4,
-  effect: { type: 'damage', die: 8, bonus: 2 },
+  attackBonus: 5,
+  effect: { type: 'damage', die: 10, bonus: 2 },
 }
 
 export function createCombatants(): Combatant[] {
@@ -143,11 +143,11 @@ export function createCombatants(): Combatant[] {
       portrait: '/assets/portraits/ashfang.png',
       team: 'enemies',
       color: 'orange',
-      maxHealth: 20,
-      health: 20,
+      maxHealth: 24,
+      health: 24,
       maxStamina: 0,
       stamina: 0,
-      defense: 13,
+      defense: 14,
       initiative: 14,
       shield: 0,
       staggered: false,
@@ -178,11 +178,11 @@ export function createCombatants(): Combatant[] {
       portrait: '/assets/portraits/mireling.png',
       team: 'enemies',
       color: 'teal',
-      maxHealth: 26,
-      health: 26,
+      maxHealth: 32,
+      health: 32,
       maxStamina: 0,
       stamina: 0,
-      defense: 12,
+      defense: 13,
       initiative: 9,
       shield: 0,
       staggered: false,

@@ -1,4 +1,4 @@
-import { Text } from '@mantine/core'
+import { Button, Text } from '@mantine/core'
 import type { Combatant, Skill } from '../../../game/combat/types'
 import { SkillDetail } from './SkillDetail/SkillDetail'
 import { SkillMenu } from './SkillMenu/SkillMenu'
@@ -10,6 +10,7 @@ interface CommandDeckProps {
   isSkillAvailable: (skill: Skill) => boolean
   onCancelSelection: () => void
   onSelectSkill: (skillId: string) => void
+  onSkipTurn: () => void
   selectedSkill?: Skill
 }
 
@@ -19,6 +20,7 @@ export function CommandDeck({
   isSkillAvailable,
   onCancelSelection,
   onSelectSkill,
+  onSkipTurn,
   selectedSkill,
 }: CommandDeckProps) {
   return (
@@ -43,6 +45,16 @@ export function CommandDeck({
               </Text>
               <Text fw={800}>{activeCombatant.stamina}</Text>
             </div>
+            <Button
+              className={styles.skipButton}
+              color="gray"
+              size="compact-xs"
+              variant="subtle"
+              onClick={onSkipTurn}
+            >
+              <span className={styles.fullSkipLabel}>Skip turn</span>
+              <span className={styles.compactSkipLabel}>Skip</span>
+            </Button>
           </div>
 
           <div className={styles.abilityLabel}>

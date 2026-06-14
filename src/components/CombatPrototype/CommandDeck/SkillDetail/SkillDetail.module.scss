@@ -104,20 +104,16 @@
 @media (max-width: 60rem) {
   .detail {
     position: fixed;
+    top: 50%;
     right: 0.9rem;
-    bottom: calc(6.8rem + env(safe-area-inset-bottom));
+    bottom: auto;
     left: 0.9rem;
     z-index: 4;
     padding: 0.7rem;
+    transform: translateY(-50%);
     box-shadow:
-      0 -1rem 2.5rem color-mix(in srgb, var(--ff-shadow) 68%, transparent),
+      0 1rem 2.5rem color-mix(in srgb, var(--ff-shadow) 68%, transparent),
       inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
-
-    &[data-target-type='ally'],
-    &[data-target-type='self'] {
-      top: clamp(9.5rem, 19dvh, 11rem);
-      bottom: auto;
-    }
   }
 
   .iconFrame {

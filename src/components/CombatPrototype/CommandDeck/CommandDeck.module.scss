@@ -21,10 +21,25 @@
 
 .commandHeader {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: 0.65rem;
   margin-bottom: 0.65rem;
+}
+
+.skipButton {
+  min-width: 4.6rem;
+  height: 2rem;
+  padding-inline: 0.55rem;
+  color: var(--ff-text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compactSkipLabel {
+  display: none;
 }
 
 .activePortrait {
@@ -101,6 +116,27 @@
     border-left: 0;
     box-shadow: 0 -1rem 2rem
       color-mix(in srgb, var(--ff-shadow) 35%, transparent);
+  }
+}
+
+@media (max-width: 30rem) {
+  .commandHeader {
+    gap: 0.45rem;
+  }
+
+  .skipButton {
+    min-width: 2.75rem;
+    width: 2.6rem;
+    padding-inline: 0.25rem;
+  }
+
+  .fullSkipLabel {
+    display: none;
+  }
+
+  .compactSkipLabel {
+    display: inline;
+    font-size: 0.58rem;
   }
 }
 

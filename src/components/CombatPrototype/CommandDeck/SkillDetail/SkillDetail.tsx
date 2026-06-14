@@ -25,7 +25,11 @@ const targetPrompts = {
 
 export function SkillDetail({ onCancel, skill }: SkillDetailProps) {
   return (
-    <div className={styles.detail} data-target-type={skill.target}>
+    <div
+      className={styles.detail}
+      data-cy="skill-detail"
+      data-target-type={skill.target}
+    >
       <div className={styles.iconFrame}>
         <img src={skill.icon} alt="" />
         <span>{skill.cost}</span>

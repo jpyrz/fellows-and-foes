@@ -7,6 +7,8 @@
   gap: 0.65rem;
   padding: 1.5rem;
   color: var(--ff-accent);
+  font: inherit;
+  border: 0;
   background:
     radial-gradient(
       ellipse at center,
@@ -14,13 +16,22 @@
       transparent 32rem
     ),
     color-mix(in srgb, var(--ff-bg-root) 82%, transparent);
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
+  cursor: pointer;
   inset: 0;
   animation: announcementLife 1.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 
   &[data-team='enemies'] {
     color: var(--ff-danger);
   }
+}
+
+.hint {
+  margin-top: 0.35rem;
+  color: var(--ff-text-muted);
+  letter-spacing: 0.12em;
+  opacity: 0.72;
 }
 
 .label {

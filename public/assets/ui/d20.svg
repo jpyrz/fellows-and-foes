@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" role="img" aria-label="Twenty-sided die">
+  <defs>
+    <linearGradient id="face" x1="34" y1="22" x2="160" y2="197" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f0dfac"/>
+      <stop offset=".5" stop-color="#b98742"/>
+      <stop offset="1" stop-color="#6d4525"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="42" y1="30" x2="163" y2="194" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff4ce"/>
+      <stop offset="1" stop-color="#a36a32"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path fill="url(#face)" stroke="url(#edge)" stroke-width="5" stroke-linejoin="round" filter="url(#glow)" d="M100 8 181 58 169 161 100 210 31 161 19 58Z"/>
+  <g fill="none" stroke="#f8e9bd" stroke-opacity=".72" stroke-width="3" stroke-linejoin="round">
+    <path d="m100 8-32 58 32 83 32-83Z"/>
+    <path d="m19 58 49 8-37 95 69-12 69 12-37-95 49-8"/>
+    <path d="m31 161 69 49 69-49"/>
+    <path d="m19 58 81 91 81-91"/>
+  </g>
+</svg>

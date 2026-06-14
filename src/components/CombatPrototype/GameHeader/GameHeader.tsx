@@ -1,4 +1,4 @@
-import { Button, Group, Menu, Text } from '@mantine/core'
+import { ActionIcon, Group, Menu, Text } from '@mantine/core'
 import { useFellowsTheme } from '../../../theme/themeContext'
 import { themeIds } from '../../../theme/themes'
 import styles from './GameHeader.module.scss'
@@ -22,15 +22,15 @@ export function GameHeader() {
 
       <Menu position="bottom-end" shadow="md" width={220}>
         <Menu.Target>
-          <Button
+          <ActionIcon
             className={styles.menuButton}
-            size="compact-sm"
+            size="lg"
             color="gray"
             variant="subtle"
             aria-label={`Theme: ${themeOptions[themeId].label}`}
           >
-            Menu <span>☰</span>
-          </Button>
+            <span aria-hidden="true">☰</span>
+          </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Campaign</Menu.Label>

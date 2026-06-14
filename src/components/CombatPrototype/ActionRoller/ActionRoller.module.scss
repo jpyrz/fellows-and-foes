@@ -2,34 +2,37 @@
   position: fixed;
   z-index: 1000;
   display: grid;
+  overflow-y: auto;
   padding: 1.25rem;
-  background: color-mix(in srgb, var(--ff-bg-root) 82%, transparent);
-  backdrop-filter: blur(8px);
+  background:
+    radial-gradient(
+      ellipse at 50% 48%,
+      color-mix(in srgb, var(--ff-accent) 15%, transparent),
+      transparent 34rem
+    ),
+    color-mix(in srgb, var(--ff-bg-root) 80%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   inset: 0;
   place-items: center;
+  animation: overlayIn 480ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 .actionRoller {
   display: flex;
-  width: min(32rem, 100%);
-  min-height: 26rem;
+  width: min(36rem, 100%);
+  min-height: min(38rem, calc(100dvh - 2.5rem));
   flex-direction: column;
   justify-content: center;
-  gap: 1.6rem;
-  padding: clamp(1.5rem, 5vw, 3rem);
+  gap: 1.35rem;
+  padding: clamp(1rem, 5vw, 2.5rem);
   text-align: center;
-  border: 1px solid var(--ff-border-strong);
-  border-radius: 1rem;
-  background:
-    radial-gradient(
-      circle at 50% 42%,
-      color-mix(in srgb, var(--ff-accent) 15%, transparent),
-      transparent 14rem
-    ),
-    color-mix(in srgb, var(--ff-bg-panel) 94%, transparent);
-  box-shadow:
-    0 2rem 5rem color-mix(in srgb, var(--ff-shadow) 70%, transparent),
-    inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
+
+  &[data-phase='rolling'] {
+    .rollHeading {
+      opacity: 0.72;
+    }
+  }
 }
 
 .rollHeading {
@@ -47,9 +50,15 @@
   gap: 0.15rem;
   margin: 0.65rem auto 0;
   padding: 0.6rem 0.85rem;
-  border: 1px solid var(--ff-border);
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--ff-surface) 80%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--ff-accent) 35%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--ff-accent) 35%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ff-surface) 58%, transparent),
+    transparent
+  );
 
   > span,
   > small {
@@ -73,29 +82,43 @@
 }
 
 .die {
+  position: relative;
   display: grid;
-  width: 7rem;
-  height: 7rem;
-  color: var(--ff-on-accent);
+  width: 8.5rem;
+  aspect-ratio: 10 / 11;
+  color: #26190f;
   font-family: Georgia, serif;
-  font-size: 2rem;
+  font-size: 1.65rem;
   font-weight: 900;
   place-items: center;
-  border: 2px solid color-mix(in srgb, var(--ff-text) 40%, transparent);
-  border-radius: 1.4rem 1.4rem 1.4rem 0.35rem;
-  background: var(--ff-accent);
-  box-shadow:
-    0 0 0 0.5rem color-mix(in srgb, var(--ff-accent) 12%, transparent),
-    0 0 3rem color-mix(in srgb, var(--ff-accent) 40%, transparent);
+  border: 0;
+  background: transparent;
+  filter: drop-shadow(
+    0 0 1.25rem color-mix(in srgb, var(--ff-accent) 35%, transparent)
+  );
   cursor: pointer;
   transition:
     transform 150ms ease,
-    box-shadow 150ms ease;
+    filter 150ms ease;
+
+  img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    inset: 0;
+  }
+
+  > span:not(.sigil) {
+    z-index: 1;
+    margin-top: -0.12rem;
+    text-shadow: 0 1px rgb(255 255 255 / 35%);
+  }
 
   &:hover:not(:disabled):not([data-settled]) {
-    box-shadow:
-      0 0 0 0.7rem color-mix(in srgb, var(--ff-accent) 16%, transparent),
-      0 0 3.5rem color-mix(in srgb, var(--ff-accent) 50%, transparent);
+    filter: drop-shadow(
+      0 0 1.8rem color-mix(in srgb, var(--ff-accent) 55%, transparent)
+    );
     transform: translateY(-0.2rem) rotate(2deg);
   }
 
@@ -119,21 +142,31 @@
   }
 
   &[data-settled][data-success] {
-    border-color: color-mix(in srgb, var(--ff-health) 75%, var(--ff-text));
-    background: var(--ff-health);
-    box-shadow:
-      0 0 0 0.5rem color-mix(in srgb, var(--ff-health) 12%, transparent),
-      0 0 3rem color-mix(in srgb, var(--ff-health) 40%, transparent);
+    filter: drop-shadow(
+      0 0 1.8rem color-mix(in srgb, var(--ff-health) 65%, transparent)
+    );
   }
 
   &[data-settled][data-failure] {
-    color: var(--ff-text);
-    border-color: color-mix(in srgb, var(--ff-danger) 75%, var(--ff-text));
-    background: var(--ff-danger);
-    box-shadow:
-      0 0 0 0.5rem color-mix(in srgb, var(--ff-danger) 12%, transparent),
-      0 0 3rem color-mix(in srgb, var(--ff-danger) 40%, transparent);
+    filter: grayscale(0.45)
+      drop-shadow(
+        0 0 1.8rem color-mix(in srgb, var(--ff-danger) 70%, transparent)
+      );
   }
+}
+
+.sigil {
+  display: grid;
+  width: 5.75rem;
+  aspect-ratio: 1;
+  color: var(--ff-accent);
+  font-size: 3rem;
+  place-items: center;
+  border: 1px solid var(--ff-accent);
+  transform: rotate(45deg);
+  box-shadow:
+    inset 0 0 2rem color-mix(in srgb, var(--ff-accent) 18%, transparent),
+    0 0 2rem color-mix(in srgb, var(--ff-accent) 35%, transparent);
 }
 
 .verdict {
@@ -240,6 +273,16 @@
   }
 }
 
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes invoke {
   0%,
   100% {
@@ -273,8 +316,7 @@
   }
 
   .die {
-    width: 5rem;
-    height: 5rem;
+    width: 5.75rem;
   }
 
   .resultStage {

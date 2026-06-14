@@ -13,7 +13,7 @@ export function InitiativeTrack({
   turnOrder,
 }: InitiativeTrackProps) {
   return (
-    <div className={styles.initiative}>
+    <div className={styles.initiative} aria-label="Turn order">
       {turnOrder.map((combatantId, index) => {
         const combatant = combatants.find(
           (candidate) => candidate.id === combatantId,
@@ -23,14 +23,25 @@ export function InitiativeTrack({
           return null
         }
 
+        const isActive = activeCombatantId === combatant.id
+
         return (
           <div
             key={combatant.id}
             className={styles.initiativeUnit}
-            data-active={activeCombatantId === combatant.id || undefined}
+            data-active={isActive || undefined}
             data-downed={combatant.health === 0 || undefined}
+            data-team={combatant.team}
+            title={`${combatant.name}${isActive ? ' is ready for battle' : ''}`}
           >
-            <span>{combatant.name.slice(0, 1)}</span>
+            {isActive && (
+              <span
+                className={styles.crossedSwords}
+                data-cy="active-initiative-marker"
+                aria-hidden
+              />
+            )}
+            <span className={styles.token}>{combatant.name.slice(0, 1)}</span>
             {index < turnOrder.length - 1 && <i />}
           </div>
         )

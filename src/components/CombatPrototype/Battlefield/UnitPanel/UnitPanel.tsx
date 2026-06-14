@@ -6,9 +6,12 @@ import styles from './UnitPanel.module.scss'
 type CombatFeedback = 'damage' | 'heal' | 'shield' | null
 
 interface UnitPanelProps {
+  actionEffect?: Combatant['skills'][number]['effect']['type']
+  actionPhase?: 'windup' | 'impact'
   combatant: Combatant
   isActive: boolean
-  isFeedbackSuppressed: boolean
+  isActionActor: boolean
+  isActionTarget: boolean
   isTargetable: boolean
   isTargeting: boolean
   layout?: 'default' | 'party'
@@ -17,9 +20,12 @@ interface UnitPanelProps {
 }
 
 export function UnitPanel({
+  actionEffect,
+  actionPhase,
   combatant,
   isActive,
-  isFeedbackSuppressed,
+  isActionActor,
+  isActionTarget,
   isTargetable,
   isTargeting,
   layout = 'default',
@@ -35,7 +41,6 @@ export function UnitPanel({
   const previousHealth = useRef(combatant.health)
   const previousShield = useRef(combatant.shield)
   const [feedback, setFeedback] = useState<CombatFeedback>(null)
-  const visibleFeedback = isFeedbackSuppressed ? null : feedback
 
   useEffect(() => {
     let nextFeedback: CombatFeedback = null
@@ -51,10 +56,6 @@ export function UnitPanel({
     previousHealth.current = combatant.health
     previousShield.current = combatant.shield
 
-    if (isFeedbackSuppressed) {
-      return
-    }
-
     if (!nextFeedback) {
       return
     }
@@ -62,7 +63,7 @@ export function UnitPanel({
     setFeedback(nextFeedback)
     const timeout = window.setTimeout(() => setFeedback(null), 700)
     return () => window.clearTimeout(timeout)
-  }, [combatant.health, combatant.shield, isFeedbackSuppressed])
+  }, [combatant.health, combatant.shield])
 
   function handleClick() {
     if (isTargetable) {
@@ -83,9 +84,13 @@ export function UnitPanel({
           : `Inspect ${combatant.name}`
       }
       className={styles.unit}
+      data-action-actor={isActionActor || undefined}
+      data-action-effect={isActionActor || isActionTarget ? actionEffect : undefined}
+      data-action-phase={isActionActor || isActionTarget ? actionPhase : undefined}
+      data-action-target={isActionTarget || undefined}
       data-active={isActive || undefined}
       data-downed={isDown || undefined}
-      data-feedback={visibleFeedback ?? undefined}
+      data-feedback={feedback ?? undefined}
       data-layout={layout}
       data-targetable={isTargetable || undefined}
       data-targeting={isTargeting || undefined}
@@ -103,11 +108,11 @@ export function UnitPanel({
         {isTargetable && (
           <span className={styles.targetReticle} aria-hidden="true" />
         )}
-        {visibleFeedback && (
+        {feedback && (
           <span className={styles.feedbackLabel}>
-            {visibleFeedback === 'damage'
+            {feedback === 'damage'
               ? 'Hit'
-              : visibleFeedback === 'heal'
+              : feedback === 'heal'
                 ? 'Healed'
                 : 'Shielded'}
           </span>

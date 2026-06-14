@@ -7,8 +7,21 @@ function resolvePendingAction() {
   cy.get('[data-cy="roll-trigger"]').click()
   cy.get('[data-cy="action-roll-overlay"]').should('contain.text', 'Result')
   cy.contains('button', 'Continue').click()
-  cy.get('[data-cy="hero-action-overlay"]').should('be.visible')
-  cy.get('[data-cy="hero-action-overlay"]').should('not.exist')
+  cy.get('[data-action-actor]').should('be.visible')
+  cy.get('[data-action-actor]').should('not.exist')
+}
+
+function finishEnemyTurn(expectHeroTurn = true) {
+  cy.get('[data-cy="turn-announcement"]')
+    .should('have.attr', 'data-team', 'enemies')
+    .click()
+  cy.get('[data-action-actor]').should('be.visible')
+  cy.get('[data-action-actor]').should('not.exist')
+  if (expectHeroTurn) {
+    cy.get('[data-cy="turn-announcement"]')
+      .should('have.attr', 'data-team', 'heroes')
+      .click()
+  }
 }
 
 function selectSkillAndTarget(skillId: string, targetId: string) {
@@ -23,20 +36,21 @@ describe('<CombatPrototype />', () => {
   })
 
   it('resolves a hero action, automates the enemy, and advances the turn', () => {
-    cy.mount(<CombatPrototype initialState={createInitialCombatState(423)} />)
+    cy.mount(<CombatPrototype initialState={createInitialCombatState(553)} />)
 
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Nyra')
+    cy.get('[data-cy="active-initiative-marker"]').should('be.visible')
     selectSkillAndTarget('quick-shot', 'ashfang')
 
     cy.get('[data-cy="action-roll-overlay"]')
       .should('be.visible')
       .and('contain.text', 'Ready to roll')
-      .and('contain.text', 'Roll d20 + 4 against Defense 13')
+      .and('contain.text', 'Roll d20 + 4 against Defense 14')
     cy.get('[data-cy="action-roll-overlay"]')
       .contains('button', 'Back')
       .should('be.visible')
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Nyra')
-    cy.get('[data-cy="ashfang-health"]').should('contain.text', '20/20')
+    cy.get('[data-cy="ashfang-health"]').should('contain.text', '24/24')
 
     cy.get('[data-cy="roll-trigger"]').click()
     cy.get('[data-cy="action-roll-overlay"]').should('contain.text', 'Rolling')
@@ -49,39 +63,31 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Nyra')
     cy.contains('button', 'Continue').click()
 
-    cy.get('[data-cy="hero-action-overlay"]')
-      .should('be.visible')
-      .and('contain.text', 'Hero attack')
-      .and('contain.text', 'Nyra readies Quick Shot')
-      .and('contain.text', 'Ashfang')
-    cy.get('[data-cy="hero-action-overlay"]').should(
-      'contain.text',
-      'Nyra uses Quick Shot',
-    )
-    cy.get('[data-feedback]').should('not.exist')
-    cy.get('[data-cy="hero-action-overlay"]').should('contain.text', 'Hit')
-    cy.get('[data-cy="hero-action-overlay"]').should('not.exist')
-    cy.get('[data-feedback]').should('not.exist')
+    cy.get('[data-action-actor][data-action-phase="windup"]')
+      .should('contain', 'Nyra')
+      .and('have.attr', 'data-action-effect', 'damage')
+    cy.get('[data-action-target]').should('contain', 'Ashfang')
+    cy.get('[data-action-target][data-feedback="damage"]')
+      .should('have.attr', 'data-action-phase', 'impact')
+      .and('contain', 'Ashfang')
+    cy.get('[data-action-actor]').should('not.exist')
     cy.get('[data-cy="turn-announcement"]')
       .should('be.visible')
       .and('have.attr', 'data-team', 'enemies')
       .and('contain.text', 'Enemy Turn')
       .and('contain.text', 'Ashfang advances')
-    cy.get('[data-cy="turn-announcement"]').should('not.exist')
-    cy.get('[data-cy="enemy-turn-overlay"]')
-      .should('be.visible')
-      .and('contain.text', 'Enemy turn')
-      .and('contain.text', 'Ashfang')
-      .and('contain.text', 'Elowen')
-    cy.get('[data-feedback]').should('not.exist')
-    cy.get('[data-cy="enemy-turn-overlay"]').should('not.exist')
-    cy.get('[data-feedback]').should('not.exist')
+      .click()
+    cy.get('[data-action-actor][data-action-phase="windup"]')
+      .should('contain', 'Ashfang')
+      .and('have.attr', 'data-action-effect', 'damage')
+    cy.get('[data-action-target]').should('contain', 'Elowen')
+    cy.get('[data-action-actor]').should('not.exist')
     cy.get('[data-cy="turn-announcement"]')
       .should('be.visible')
       .and('have.attr', 'data-team', 'heroes')
       .and('contain.text', 'Your Turn')
       .and('contain.text', 'Elowen is ready')
-    cy.get('[data-cy="turn-announcement"]').should('not.exist')
+      .click()
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Elowen')
     cy.contains('button', 'Log').click()
     cy.get('[data-cy="combat-log"]')
@@ -94,6 +100,7 @@ describe('<CombatPrototype />', () => {
 
     selectSkillAndTarget('twin-strike', 'mireling')
     resolvePendingAction()
+    finishEnemyTurn()
     cy.get('[data-cy="nyra-stamina"]').should('contain.text', '1/4')
     cy.get('[data-cy="active-turn"]', { timeout: 10000 }).should(
       'contain.text',
@@ -108,15 +115,18 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="roll-trigger"]').click()
     cy.get('[data-cy="action-roll-overlay"]').should('contain.text', 'Result')
     cy.contains('button', 'Continue').click()
-    cy.get('[data-cy="hero-action-overlay"]')
+    cy.get('[data-action-actor][data-action-phase="windup"]')
       .should('be.visible')
-      .and('have.attr', 'data-effect', 'shield')
-      .and('contain.text', 'Protection')
-    cy.get('[data-cy="hero-action-overlay"]').should(
-      'contain.text',
-      'Shielded',
+      .and('have.attr', 'data-action-effect', 'shield')
+      .and('contain', 'Elowen')
+    cy.get('[data-action-target]').should('contain', 'Brann')
+    cy.get('[data-action-target][data-feedback="shield"]').should(
+      'have.attr',
+      'data-action-phase',
+      'impact',
     )
-    cy.get('[data-cy="hero-action-overlay"]').should('not.exist')
+    cy.get('[data-action-actor]').should('not.exist')
+    finishEnemyTurn()
     cy.get('[data-cy="active-turn"]', { timeout: 10000 }).should(
       'contain.text',
       'Brann',
@@ -142,7 +152,7 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="settled-die"]')
       .should('be.visible')
       .and('have.attr', 'aria-label', 'Rolled 5 on a d20')
-    cy.get('[data-cy="ashfang-health"]').should('contain.text', '20/20')
+    cy.get('[data-cy="ashfang-health"]').should('contain.text', '24/24')
   })
 
   it('allows backing out before rolling without committing the action', () => {
@@ -157,7 +167,7 @@ describe('<CombatPrototype />', () => {
     cy.get('[data-cy="action-roll-overlay"]').should('not.exist')
     cy.get('[data-cy="target-ashfang"]').should('be.visible')
     cy.get('[data-cy="nyra-stamina"]').should('contain.text', '4/4')
-    cy.get('[data-cy="ashfang-health"]').should('contain.text', '20/20')
+    cy.get('[data-cy="ashfang-health"]').should('contain.text', '24/24')
 
     cy.get('[data-cy="target-ashfang"]').click()
     cy.get('[data-cy="roll-trigger"]').click()
@@ -178,10 +188,27 @@ describe('<CombatPrototype />', () => {
     cy.contains('Cast on').next().should('contain.text', 'Enemy')
   })
 
+  it('keeps skill details vertically centered for every target type', () => {
+    cy.mount(<CombatPrototype />)
+
+    cy.get('[data-cy="skill-quick-shot"]').click()
+    cy.get('[data-cy="skill-detail"]').then(($detail) => {
+      const enemyCenter = $detail[0].getBoundingClientRect()
+      expect(enemyCenter.top + enemyCenter.height / 2).to.be.closeTo(450, 1)
+    })
+
+    cy.contains('button', 'Close').click()
+    cy.get('[data-cy="skill-evasive-guard"]').click()
+    cy.get('[data-cy="skill-detail"]').then(($detail) => {
+      const allyCenter = $detail[0].getBoundingClientRect()
+      expect(allyCenter.top + allyCenter.height / 2).to.be.closeTo(450, 1)
+    })
+  })
+
   it('keeps secondary unit stats behind inspection', () => {
     cy.mount(<CombatPrototype />)
 
-    cy.contains('DEF 12').should('not.exist')
+    cy.contains('DEF 14').should('not.exist')
     cy.get('button[aria-label="Inspect Ashfang"]').click()
     cy.get('[data-cy="unit-inspector"]')
       .should('contain.text', 'Ember Stalker')
@@ -235,12 +262,39 @@ describe('<CombatPrototype />', () => {
     cy.mount(<CombatPrototype initialState={losingState} />)
     selectSkillAndTarget('quick-shot', 'ashfang')
     resolvePendingAction()
+    finishEnemyTurn(false)
 
     cy.get('[data-cy="combat-status"]', { timeout: 10000 }).should(
       'contain.text',
       'defeat',
     )
     cy.contains('h2', 'The expedition has fallen.').should('be.visible')
+  })
+
+  it('allows a hero to skip their turn', () => {
+    cy.mount(<CombatPrototype initialState={createInitialCombatState(553)} />)
+
+    cy.contains('button', 'Skip turn').click()
+    cy.get('[data-cy="turn-announcement"]')
+      .should('have.attr', 'data-team', 'enemies')
+      .and('contain.text', 'Ashfang advances')
+
+    finishEnemyTurn()
+    cy.get('[data-cy="active-turn"]').should('contain.text', 'Elowen')
+    cy.contains('button', 'Log').click()
+    cy.get('[data-cy="combat-log"]').should(
+      'contain.text',
+      'Nyra holds position and passes the turn.',
+    )
+  })
+
+  it('keeps the skip turn control visible on compact screens', () => {
+    cy.viewport(480, 900)
+    cy.mount(<CombatPrototype />)
+    cy.contains('button', 'Skip').should('be.visible')
+
+    cy.viewport(375, 812)
+    cy.contains('button', 'Skip').should('be.visible')
   })
 
   it('uses the full viewport without creating a simulated device frame', () => {

@@ -38,12 +38,11 @@
 
 .menuButton {
   color: var(--ff-text-muted);
-  letter-spacing: 0.04em;
 
   span {
-    margin-left: 0.35rem;
     color: var(--ff-accent);
-    font-size: 0.65rem;
+    font-size: 1.45rem;
+    line-height: 1;
   }
 }
 

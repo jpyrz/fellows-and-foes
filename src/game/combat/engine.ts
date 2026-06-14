@@ -481,6 +481,20 @@ export function advanceCombatTurn(state: CombatState) {
   return advanceTurn(state)
 }
 
+export function passHeroTurn(state: CombatState) {
+  const actor = getActiveCombatant(state)
+
+  if (state.status !== 'active' || !actor || actor.team !== 'heroes') {
+    return state
+  }
+
+  return addLog(
+    state,
+    `${actor.name} holds position and passes the turn.`,
+    'hero',
+  )
+}
+
 export function resolveEnemyAction(
   state: CombatState,
 ): EnemyActionResolution | null {
