@@ -1,67 +1,35 @@
-import { Text, UnstyledButton } from '@mantine/core'
+import { UnstyledButton } from '@mantine/core'
 import type { Skill } from '../../../../game/combat/types'
-import {
-  formatSkillAccuracy,
-  formatSkillEffect,
-} from './formatSkillEffect'
 import styles from './SkillMenu.module.scss'
 
 interface SkillMenuProps {
   isSkillAvailable: (skill: Skill) => boolean
   onSelectSkill: (skillId: string) => void
+  selectedSkillId?: string
   skills: Skill[]
 }
 
 export function SkillMenu({
   isSkillAvailable,
   onSelectSkill,
+  selectedSkillId,
   skills,
 }: SkillMenuProps) {
   return (
-    <div className={styles.skillMenu}>
+    <div className={styles.hotbar} aria-label="Abilities">
       {skills.map((skill, index) => (
         <UnstyledButton
           key={skill.id}
-          className={styles.skillCommand}
+          aria-label={`${skill.name}, ${skill.cost} stamina`}
+          className={styles.skillSlot}
           data-cy={`skill-${skill.id}`}
+          data-selected={selectedSkillId === skill.id || undefined}
           disabled={!isSkillAvailable(skill)}
           onClick={() => onSelectSkill(skill.id)}
         >
-          <span className={styles.commandKey}>0{index + 1}</span>
-          <span className={styles.skillText}>
-            <Text fw={800} size="sm">
-              {skill.name}
-            </Text>
-            <Text size="10px" c="dimmed" lineClamp={1}>
-              {skill.description}
-            </Text>
-          </span>
-          <span className={styles.skillMeta}>
-            <span>
-              <Text size="9px" c="dimmed" fw={800} tt="uppercase">
-                Accuracy
-              </Text>
-              <Text size="10px" fw={800}>
-                {formatSkillAccuracy(skill)}
-              </Text>
-            </span>
-            <span>
-              <Text size="9px" c="dimmed" fw={800} tt="uppercase">
-                Effect
-              </Text>
-              <Text size="10px" c="brand" fw={800}>
-                {formatSkillEffect(skill)}
-              </Text>
-            </span>
-            <span>
-              <Text size="9px" c="dimmed" fw={800} tt="uppercase">
-                Cost
-              </Text>
-              <Text size="10px" fw={800}>
-                {skill.cost} stamina
-              </Text>
-            </span>
-          </span>
+          <img src={skill.icon} alt="" />
+          <span className={styles.slotNumber}>{index + 1}</span>
+          <span className={styles.skillCost}>{skill.cost}</span>
         </UnstyledButton>
       ))}
     </div>

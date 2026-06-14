@@ -34,3 +34,6 @@ turn-based combat, checkpoint skill rewards, and permanent character growth
 before multiplayer infrastructure is added.
 
 See [docs/ALPHA_PLAN.md](docs/ALPHA_PLAN.md) for the current scope.
+
+Placeholder art attribution is documented in
+[ASSET_CREDITS.md](ASSET_CREDITS.md).

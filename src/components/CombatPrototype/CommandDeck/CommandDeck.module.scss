@@ -31,14 +31,23 @@
   display: grid;
   width: 2.35rem;
   height: 2.35rem;
-  color: var(--ff-on-accent);
-  font-family: Georgia, serif;
-  font-size: 1rem;
-  font-weight: 900;
   place-items: center;
+  overflow: hidden;
   border: 1px solid var(--ff-border);
   border-radius: 0.55rem 0.55rem 0.55rem 0.15rem;
-  background: var(--ff-accent);
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ff-accent) 45%, transparent),
+      transparent 72%
+    ),
+    var(--ff-bg-panel);
+
+  img {
+    width: 76%;
+    height: 76%;
+    object-fit: contain;
+  }
 }
 
 .commandTitle {
@@ -56,6 +65,12 @@
   background: color-mix(in srgb, var(--ff-stamina) 8%, transparent);
 }
 
+.abilityLabel {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.65rem 0 0.35rem;
+}
+
 .resultMenu {
   display: flex;
   min-height: 13.5rem;
@@ -65,7 +80,8 @@
 
 @media (max-width: 60rem) {
   .commandDeck {
-    min-height: 14.5rem;
+    position: relative;
+    min-height: 7.25rem;
     padding: 0.75rem 0.9rem calc(0.9rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--ff-border-strong);
     border-left: 0;
@@ -76,6 +92,6 @@
 
 @media (max-height: 48rem) and (max-width: 60rem) {
   .commandDeck {
-    min-height: 14rem;
+    min-height: 7rem;
   }
 }

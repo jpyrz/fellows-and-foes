@@ -37,6 +37,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     () => initialState ?? createInitialCombatState(),
   )
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null)
+  const [isTargeting, setIsTargeting] = useState(false)
   const [pendingAction, setPendingAction] = useState<{
     resolution?: HeroActionResolution
     sequence: ActionSequence
@@ -78,6 +79,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
 
   function chooseTarget(targetId: string) {
     if (
+      !isTargeting ||
       !selectedSkillId ||
       !selectedSkill ||
       !activeCombatant ||
@@ -90,7 +92,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
       (combatant) => combatant.id === targetId,
     )
 
-    if (!target) {
+    if (!target || !validTargets.some((validTarget) => validTarget.id === targetId)) {
       return
     }
 
@@ -149,6 +151,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     const token = actionToken.current + 1
     actionToken.current = token
     setSelectedSkillId(null)
+    setIsTargeting(false)
     setPendingAction((current) =>
       current
         ? {
@@ -198,6 +201,16 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     resolvingAction.current = false
   }
 
+  function selectSkill(skillId: string) {
+    setSelectedSkillId(skillId)
+    setIsTargeting(false)
+  }
+
+  function cancelSelection() {
+    setSelectedSkillId(null)
+    setIsTargeting(false)
+  }
+
   function cancelPendingAction() {
     if (!pendingAction || pendingAction.sequence.phase !== 'ready') {
       return
@@ -212,6 +225,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
     resolvingAction.current = false
     setCombat(createInitialCombatState())
     setSelectedSkillId(null)
+    setIsTargeting(false)
     setPendingAction(null)
   }
 
@@ -234,15 +248,21 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           activeCombatantId={activeCombatant?.id}
           enemies={enemies}
           heroes={heroes}
+          isTargeting={isTargeting}
           latestMessage={combat.log.at(-1)?.message}
+          onChooseTarget={chooseTarget}
+          targetableIds={
+            isTargeting ? validTargets.map((target) => target.id) : []
+          }
         />
         <CommandDeck
           activeCombatant={activeCombatant}
+          isTargeting={isTargeting}
           isSkillAvailable={isSkillAvailable}
-          onBackToSkills={() => setSelectedSkillId(null)}
-          onChooseTarget={chooseTarget}
+          onBeginTargeting={() => setIsTargeting(true)}
+          onCancelSelection={cancelSelection}
           onReset={resetCombat}
-          onSelectSkill={setSelectedSkillId}
+          onSelectSkill={selectSkill}
           selectedSkill={selectedSkill}
           status={combat.status}
           validTargets={validTargets}

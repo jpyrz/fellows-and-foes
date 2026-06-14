@@ -26,6 +26,7 @@ export interface Skill {
   id: string
   name: string
   description: string
+  icon: string
   cost: number
   target: TargetType
   attackBonus?: number
@@ -36,6 +37,7 @@ export interface Combatant {
   id: string
   name: string
   title: string
+  portrait: string
   team: Team
   color: string
   maxHealth: number

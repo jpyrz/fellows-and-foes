@@ -4,15 +4,16 @@ import type {
   Combatant,
   Skill,
 } from '../../../game/combat/types'
+import { SkillDetail } from './SkillDetail/SkillDetail'
 import { SkillMenu } from './SkillMenu/SkillMenu'
-import { TargetMenu } from './TargetMenu/TargetMenu'
 import styles from './CommandDeck.module.scss'
 
 interface CommandDeckProps {
   activeCombatant?: Combatant
+  isTargeting: boolean
   isSkillAvailable: (skill: Skill) => boolean
-  onBackToSkills: () => void
-  onChooseTarget: (targetId: string) => void
+  onBeginTargeting: () => void
+  onCancelSelection: () => void
   onReset: () => void
   onSelectSkill: (skillId: string) => void
   selectedSkill?: Skill
@@ -22,9 +23,10 @@ interface CommandDeckProps {
 
 export function CommandDeck({
   activeCombatant,
+  isTargeting,
   isSkillAvailable,
-  onBackToSkills,
-  onChooseTarget,
+  onBeginTargeting,
+  onCancelSelection,
   onReset,
   onSelectSkill,
   selectedSkill,
@@ -37,7 +39,7 @@ export function CommandDeck({
         <>
           <div className={styles.commandHeader}>
             <div className={styles.activePortrait}>
-              {activeCombatant.name.slice(0, 1)}
+              <img src={activeCombatant.portrait} alt="" />
             </div>
             <div className={styles.commandTitle}>
               <Text size="10px" c="brand" fw={800} tt="uppercase">
@@ -55,18 +57,29 @@ export function CommandDeck({
             </div>
           </div>
 
-          {selectedSkill ? (
-            <TargetMenu
-              onBack={onBackToSkills}
-              onChooseTarget={onChooseTarget}
+          <div className={styles.abilityLabel}>
+            <Text size="10px" c="dimmed" fw={800} tt="uppercase">
+              {isTargeting ? 'Select a combatant' : 'Abilities'}
+            </Text>
+            <Text size="10px" c={isTargeting ? 'brand' : 'dimmed'} fw={800}>
+              {isTargeting ? 'Valid targets are glowing' : 'Tap to inspect'}
+            </Text>
+          </div>
+
+          <SkillMenu
+            isSkillAvailable={isSkillAvailable}
+            onSelectSkill={onSelectSkill}
+            selectedSkillId={selectedSkill?.id}
+            skills={activeCombatant.skills}
+          />
+
+          {selectedSkill && (
+            <SkillDetail
+              isTargeting={isTargeting}
+              onBeginTargeting={onBeginTargeting}
+              onCancel={onCancelSelection}
               skill={selectedSkill}
-              targets={validTargets}
-            />
-          ) : (
-            <SkillMenu
-              isSkillAvailable={isSkillAvailable}
-              onSelectSkill={onSelectSkill}
-              skills={activeCombatant.skills}
+              targetCount={validTargets.length}
             />
           )}
         </>

@@ -5,28 +5,46 @@ import styles from './UnitPanel.module.scss'
 interface UnitPanelProps {
   combatant: Combatant
   isActive: boolean
+  isTargetable: boolean
+  isTargeting: boolean
   layout?: 'default' | 'party'
+  onChooseTarget: (targetId: string) => void
 }
 
 export function UnitPanel({
   combatant,
   isActive,
+  isTargetable,
+  isTargeting,
   layout = 'default',
+  onChooseTarget,
 }: UnitPanelProps) {
   const healthPercent = (combatant.health / combatant.maxHealth) * 100
   const isDown = combatant.health === 0
 
   return (
-    <div
+    <button
+      aria-label={
+        isTargetable ? `Target ${combatant.name}` : combatant.name
+      }
       className={styles.unit}
       data-active={isActive || undefined}
       data-downed={isDown || undefined}
       data-layout={layout}
-      data-cy={`combatant-${combatant.id}`}
+      data-targetable={isTargetable || undefined}
+      data-targeting={isTargeting || undefined}
+      data-cy={isTargetable ? `target-${combatant.id}` : undefined}
+      disabled={!isTargetable}
+      onClick={() => onChooseTarget(combatant.id)}
+      type="button"
     >
-      <div className={styles.portrait}>
-        <span>{combatant.name.slice(0, 1)}</span>
+      <div
+        className={styles.portrait}
+        data-cy={`combatant-${combatant.id}`}
+      >
+        <img src={combatant.portrait} alt="" />
         {isActive && <i className={styles.turnMarker} />}
+        {isTargetable && <span className={styles.targetMarker}>Target</span>}
       </div>
 
       <div className={styles.unitDetails}>
@@ -105,6 +123,6 @@ export function UnitPanel({
           </Group>
         )}
       </div>
-    </div>
+    </button>
   )
 }

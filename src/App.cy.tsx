@@ -9,6 +9,12 @@ function resolvePendingAction() {
   cy.contains('button', 'Continue').click()
 }
 
+function selectSkillAndTarget(skillId: string, targetId: string) {
+  cy.get(`[data-cy="skill-${skillId}"]`).click()
+  cy.get('[data-cy="choose-target"]').click()
+  cy.get(`[data-cy="target-${targetId}"]`).click()
+}
+
 describe('<CombatPrototype />', () => {
   beforeEach(() => {
     cy.viewport(430, 900)
@@ -19,8 +25,7 @@ describe('<CombatPrototype />', () => {
     cy.mount(<CombatPrototype />)
 
     cy.get('[data-cy="active-turn"]').should('contain.text', 'Nyra')
-    cy.get('[data-cy="skill-quick-shot"]').click()
-    cy.get('[data-cy="target-ashfang"]').click()
+    selectSkillAndTarget('quick-shot', 'ashfang')
 
     cy.get('[data-cy="action-roll-overlay"]')
       .should('be.visible')
@@ -53,13 +58,11 @@ describe('<CombatPrototype />', () => {
   it('spends stamina and allows support skills to target allies', () => {
     cy.mount(<CombatPrototype />)
 
-    cy.get('[data-cy="skill-twin-strike"]').click()
-    cy.get('[data-cy="target-mireling"]').click()
+    selectSkillAndTarget('twin-strike', 'mireling')
     resolvePendingAction()
     cy.get('[data-cy="nyra-stamina"]').should('contain.text', '4/6')
 
-    cy.get('[data-cy="skill-aegis"]').click()
-    cy.get('[data-cy="target-brann"]').click()
+    selectSkillAndTarget('aegis', 'brann')
     cy.get('[data-cy="action-roll-overlay"]').should(
       'contain.text',
       'Ready to invoke',
@@ -77,8 +80,7 @@ describe('<CombatPrototype />', () => {
   it('clearly presents a failed roll and keeps the settled die visible', () => {
     cy.mount(<CombatPrototype initialState={createInitialCombatState(1)} />)
 
-    cy.get('[data-cy="skill-quick-shot"]').click()
-    cy.get('[data-cy="target-ashfang"]').click()
+    selectSkillAndTarget('quick-shot', 'ashfang')
     cy.get('[data-cy="roll-trigger"]').click()
 
     cy.get('[data-cy="action-verdict"]')
@@ -93,8 +95,7 @@ describe('<CombatPrototype />', () => {
   it('allows backing out before rolling without committing the action', () => {
     cy.mount(<CombatPrototype initialState={createInitialCombatState(1)} />)
 
-    cy.get('[data-cy="skill-quick-shot"]').click()
-    cy.get('[data-cy="target-ashfang"]').click()
+    selectSkillAndTarget('quick-shot', 'ashfang')
     cy.get('[data-cy="action-roll-overlay"]').should('be.visible')
     cy.get('[data-cy="action-roll-overlay"]')
       .contains('button', 'Back')
@@ -114,6 +115,18 @@ describe('<CombatPrototype />', () => {
     )
   })
 
+  it('lets players inspect an ability before entering target mode', () => {
+    cy.mount(<CombatPrototype />)
+
+    cy.get('[data-cy="skill-quick-shot"]').click()
+    cy.contains('h2', 'Quick Shot').should('be.visible')
+    cy.get('[data-cy="target-ashfang"]').should('not.exist')
+
+    cy.get('[data-cy="choose-target"]').click()
+    cy.get('[data-cy="target-ashfang"]').should('be.visible')
+    cy.contains('Quick Shot armed').should('be.visible')
+  })
+
   it('ends the encounter when the final enemy is defeated', () => {
     const winningState = createInitialCombatState(1)
     winningState.combatants = winningState.combatants.map((combatant) => {
@@ -129,8 +142,7 @@ describe('<CombatPrototype />', () => {
     })
 
     cy.mount(<CombatPrototype initialState={winningState} />)
-    cy.get('[data-cy="skill-quick-shot"]').click()
-    cy.get('[data-cy="target-ashfang"]').click()
+    selectSkillAndTarget('quick-shot', 'ashfang')
     resolvePendingAction()
 
     cy.get('[data-cy="combat-status"]').should('contain.text', 'victory')
@@ -156,8 +168,7 @@ describe('<CombatPrototype />', () => {
     })
 
     cy.mount(<CombatPrototype initialState={losingState} />)
-    cy.get('[data-cy="skill-quick-shot"]').click()
-    cy.get('[data-cy="target-ashfang"]').click()
+    selectSkillAndTarget('quick-shot', 'ashfang')
     resolvePendingAction()
 
     cy.get('[data-cy="combat-status"]').should('contain.text', 'defeat')

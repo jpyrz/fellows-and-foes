@@ -7,14 +7,20 @@ interface BattlefieldProps {
   activeCombatantId?: string
   enemies: Combatant[]
   heroes: Combatant[]
+  isTargeting: boolean
   latestMessage?: string
+  onChooseTarget: (targetId: string) => void
+  targetableIds: string[]
 }
 
 export function Battlefield({
   activeCombatantId,
   enemies,
   heroes,
+  isTargeting,
   latestMessage,
+  onChooseTarget,
+  targetableIds,
 }: BattlefieldProps) {
   return (
     <section className={styles.battlefield}>
@@ -26,6 +32,9 @@ export function Battlefield({
               key={enemy.id}
               combatant={enemy}
               isActive={activeCombatantId === enemy.id}
+              isTargetable={targetableIds.includes(enemy.id)}
+              isTargeting={isTargeting}
+              onChooseTarget={onChooseTarget}
             />
           ))}
         </div>
@@ -46,7 +55,10 @@ export function Battlefield({
               key={hero.id}
               combatant={hero}
               isActive={activeCombatantId === hero.id}
+              isTargetable={targetableIds.includes(hero.id)}
+              isTargeting={isTargeting}
               layout="party"
+              onChooseTarget={onChooseTarget}
             />
           ))}
         </div>
