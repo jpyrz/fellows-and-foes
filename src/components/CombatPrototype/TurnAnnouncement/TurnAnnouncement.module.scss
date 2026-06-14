@@ -1,0 +1,75 @@
+.overlay {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.65rem;
+  padding: 1.5rem;
+  color: var(--ff-accent);
+  background:
+    radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, currentColor 12%, transparent),
+      transparent 32rem
+    ),
+    color-mix(in srgb, var(--ff-bg-root) 82%, transparent);
+  backdrop-filter: blur(5px);
+  inset: 0;
+  animation: announcementLife 1.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+
+  &[data-team='enemies'] {
+    color: var(--ff-danger);
+  }
+}
+
+.label {
+  font-family: Georgia, serif;
+  font-size: clamp(2.75rem, 13vw, 6.5rem);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  line-height: 0.95;
+  text-align: center;
+  text-shadow: 0 0 2rem
+    color-mix(in srgb, currentColor 48%, transparent);
+  transform: rotate(-2deg);
+}
+
+.combatant {
+  color: var(--ff-text);
+  font-family: Georgia, serif;
+  font-size: clamp(0.95rem, 3vw, 1.2rem);
+  letter-spacing: 0.04em;
+}
+
+.line {
+  width: min(30rem, 78vw);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  box-shadow: 0 0 1rem
+    color-mix(in srgb, currentColor 50%, transparent);
+}
+
+@keyframes announcementLife {
+  0% {
+    opacity: 0;
+    transform: scale(1.045);
+  }
+
+  30%,
+  68% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+}

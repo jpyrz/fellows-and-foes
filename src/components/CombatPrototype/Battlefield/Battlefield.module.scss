@@ -10,21 +10,22 @@
   background:
     radial-gradient(
       ellipse at 50% 45%,
-      color-mix(in srgb, var(--ff-accent) 7%, transparent),
-      transparent 48%
+      color-mix(in srgb, var(--ff-accent) 10%, transparent),
+      transparent 52%
     ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--ff-shadow) 30%, transparent),
-      transparent 38%,
-      color-mix(in srgb, var(--ff-shadow) 22%, transparent)
+      color-mix(in srgb, var(--ff-danger) 4%, transparent),
+      transparent 35%,
+      color-mix(in srgb, var(--ff-accent) 4%, transparent)
     ),
     repeating-linear-gradient(
       90deg,
       transparent 0,
       transparent 3rem,
       color-mix(in srgb, var(--ff-text) 2%, transparent) 3.05rem
-    );
+    ),
+    var(--ff-bg-battlefield);
 }
 
 .enemyLane,
@@ -66,27 +67,38 @@
   grid-template-columns: repeat(3, minmax(7rem, 1fr));
 }
 
-.eventRibbon {
+.versus {
   position: relative;
-  display: grid;
-  min-height: 3.25rem;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  min-height: 3.5rem;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 0.85rem;
-  color: var(--ff-text-muted);
-  border-block: 1px solid var(--ff-border);
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 0.55rem 0.85rem;
+  color: color-mix(in srgb, var(--ff-text-muted) 82%, transparent);
+  border-block: 1px solid var(--ff-border-strong);
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--ff-shadow) 45%, transparent) 10%,
-    color-mix(in srgb, var(--ff-shadow) 45%, transparent) 90%,
+    color-mix(in srgb, var(--ff-bg-panel) 88%, transparent) 10%,
+    color-mix(in srgb, var(--ff-bg-panel) 88%, transparent) 90%,
     transparent
   );
 
-  > span {
+  span {
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  strong {
     color: var(--ff-accent);
-    font-size: 0.65rem;
+    font-family: Georgia, serif;
+    font-size: clamp(1.5rem, 4vw, 2.15rem);
+    font-style: italic;
+    text-shadow: 0 0 1rem
+      color-mix(in srgb, var(--ff-accent) 35%, transparent);
   }
 }
 
@@ -114,8 +126,9 @@
     gap: 0.35rem;
   }
 
-  .eventRibbon {
+  .versus {
     align-self: center;
+    width: 100%;
     min-height: 2.8rem;
     padding: 0.5rem 0.65rem;
   }

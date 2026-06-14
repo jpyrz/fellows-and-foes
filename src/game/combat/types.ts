@@ -76,6 +76,12 @@ export interface HeroActionResolution {
   message: string
 }
 
+export interface EnemyActionResolution extends HeroActionResolution {
+  actorId: string
+  skill: Skill
+  targetId: string
+}
+
 export interface CombatState {
   combatants: Combatant[]
   turnOrder: string[]

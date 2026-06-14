@@ -74,11 +74,22 @@
   margin: 0.65rem 0 0.35rem;
 }
 
-.resultMenu {
+.waiting {
   display: flex;
-  min-height: 13.5rem;
-  flex-direction: column;
+  min-height: 7rem;
+  align-items: center;
   justify-content: center;
+  gap: 0.6rem;
+
+  span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--ff-danger);
+    box-shadow: 0 0 0.8rem
+      color-mix(in srgb, var(--ff-danger) 60%, transparent);
+    animation: waitingPulse 1.2s ease-in-out infinite;
+  }
 }
 
 @media (max-width: 60rem) {
@@ -96,5 +107,12 @@
 @media (max-height: 48rem) and (max-width: 60rem) {
   .commandDeck {
     min-height: 7rem;
+  }
+}
+
+@keyframes waitingPulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75);
   }
 }

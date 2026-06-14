@@ -1,5 +1,7 @@
 .shell {
+  height: 100dvh;
   min-height: 100dvh;
+  overflow: hidden;
   color: var(--ff-text);
   background:
     radial-gradient(
@@ -17,6 +19,7 @@
   display: grid;
   width: 100%;
   max-width: 90rem;
+  height: 100dvh;
   min-height: 100dvh;
   margin: 0 auto;
   grid-template-areas:

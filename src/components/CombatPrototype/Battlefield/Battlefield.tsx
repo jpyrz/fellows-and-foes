@@ -10,7 +10,6 @@ interface BattlefieldProps {
   heroes: Combatant[]
   isTargeting: boolean
   inspectedCombatantId: string | null
-  latestMessage?: string
   onCloseInspection: () => void
   onChooseTarget: (targetId: string) => void
   onInspect: (combatantId: string) => void
@@ -23,7 +22,6 @@ export function Battlefield({
   heroes,
   isTargeting,
   inspectedCombatantId,
-  latestMessage,
   onCloseInspection,
   onChooseTarget,
   onInspect,
@@ -53,11 +51,10 @@ export function Battlefield({
         </div>
       </div>
 
-      <div className={styles.eventRibbon}>
-        <span>◆</span>
-        <Text size="xs" lineClamp={2}>
-          {latestMessage}
-        </Text>
+      <div className={styles.versus} aria-label="Fellows versus foes">
+        <span>Fellows</span>
+        <strong>VS</strong>
+        <span>Foes</span>
       </div>
 
       <div className={styles.partyLane}>

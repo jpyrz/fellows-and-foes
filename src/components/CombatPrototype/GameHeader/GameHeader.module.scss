@@ -23,11 +23,28 @@
   transform: rotate(-3deg);
 }
 
-.location {
+.campaign {
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.campaignTitle {
   font-family: Georgia, serif;
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: clamp(0.88rem, 2.6vw, 1rem);
+  font-weight: 900;
   line-height: 1.1;
+  white-space: nowrap;
+}
+
+.menuButton {
+  color: var(--ff-text-muted);
+  letter-spacing: 0.04em;
+
+  span {
+    margin-left: 0.35rem;
+    color: var(--ff-accent);
+    font-size: 0.65rem;
+  }
 }
 
 .themeOption {
@@ -42,5 +59,11 @@
 @media (max-width: 30rem) {
   .topBar {
     padding-inline: 0.9rem;
+  }
+
+  .campaignTitle {
+    max-width: 11rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

@@ -9,14 +9,21 @@ import styles from './SkillDetail.module.scss'
 interface SkillDetailProps {
   onCancel: () => void
   skill: Skill
-  targetCount: number
 }
 
-export function SkillDetail({
-  onCancel,
-  skill,
-  targetCount,
-}: SkillDetailProps) {
+const targetLabels = {
+  ally: 'Ally',
+  enemy: 'Enemy',
+  self: 'Self',
+} as const
+
+const targetPrompts = {
+  ally: 'Choose a marked ally',
+  enemy: 'Choose a marked enemy',
+  self: 'Choose yourself',
+} as const
+
+export function SkillDetail({ onCancel, skill }: SkillDetailProps) {
   return (
     <div className={styles.detail} data-target-type={skill.target}>
       <div className={styles.iconFrame}>
@@ -46,15 +53,15 @@ export function SkillDetail({
             <strong>{formatSkillEffect(skill)}</strong>
           </span>
           <span>
-            <small>Targets</small>
-            <strong>{targetCount}</strong>
+            <small>Cast on</small>
+            <strong>{targetLabels[skill.target]}</strong>
           </span>
         </div>
       </div>
 
       <div className={styles.actions}>
         <Text size="10px" c="brand" fw={800} tt="uppercase">
-          Tap one of {targetCount} marked targets
+          {targetPrompts[skill.target]}
         </Text>
         <Button
           color="gray"

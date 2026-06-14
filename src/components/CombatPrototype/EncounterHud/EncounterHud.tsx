@@ -1,4 +1,4 @@
-import { Badge, Group, Text } from '@mantine/core'
+import { ActionIcon, Badge, Button, Group, Text } from '@mantine/core'
 import type {
   CombatStatus,
   Combatant,
@@ -9,6 +9,8 @@ import styles from './EncounterHud.module.scss'
 interface EncounterHudProps {
   activeCombatantId?: string
   combatants: Combatant[]
+  onOpenLog: () => void
+  onReset: () => void
   round: number
   status: CombatStatus
   turnOrder: string[]
@@ -17,35 +19,59 @@ interface EncounterHudProps {
 export function EncounterHud({
   activeCombatantId,
   combatants,
+  onOpenLog,
+  onReset,
   round,
   status,
   turnOrder,
 }: EncounterHudProps) {
   return (
     <section className={styles.hud}>
-      <Group justify="space-between" wrap="nowrap">
-        <div>
-          <Text size="10px" c="brand" fw={800} tt="uppercase">
-            Encounter 01
+      <div className={styles.summary}>
+        <div className={styles.encounter}>
+          <Text size="9px" c="brand" fw={900} tt="uppercase">
+            Old Road · Encounter 01
           </Text>
-          <Text fw={800} size="lg">
+          <Text className={styles.title} fw={900}>
             Smoke in the Mire
           </Text>
         </div>
-        <Badge
-          color={
-            status === 'victory'
-              ? 'brand'
-              : status === 'defeat'
-                ? 'red'
-                : 'dark'
-          }
-          variant="filled"
-          data-cy="combat-status"
-        >
-          {status === 'active' ? `Round ${round}` : status}
-        </Badge>
-      </Group>
+
+        <Group className={styles.controls} gap="xs" wrap="nowrap">
+          <Badge
+            className={styles.round}
+            color={
+              status === 'victory'
+                ? 'brand'
+                : status === 'defeat'
+                  ? 'red'
+                  : 'dark'
+            }
+            variant="filled"
+            data-cy="combat-status"
+          >
+            {status === 'active' ? `Round ${round}` : status}
+          </Badge>
+          <Button
+            className={styles.logButton}
+            color="gray"
+            onClick={onOpenLog}
+            size="compact-xs"
+            variant="subtle"
+          >
+            Log
+          </Button>
+          <ActionIcon
+            className={styles.resetButton}
+            variant="subtle"
+            color="gray"
+            aria-label="Reset encounter"
+            onClick={onReset}
+          >
+            ↻
+          </ActionIcon>
+        </Group>
+      </div>
 
       <InitiativeTrack
         activeCombatantId={activeCombatantId}

@@ -1,9 +1,5 @@
-import { Button, Text } from '@mantine/core'
-import type {
-  CombatStatus,
-  Combatant,
-  Skill,
-} from '../../../game/combat/types'
+import { Text } from '@mantine/core'
+import type { Combatant, Skill } from '../../../game/combat/types'
 import { SkillDetail } from './SkillDetail/SkillDetail'
 import { SkillMenu } from './SkillMenu/SkillMenu'
 import styles from './CommandDeck.module.scss'
@@ -13,11 +9,8 @@ interface CommandDeckProps {
   isTargeting: boolean
   isSkillAvailable: (skill: Skill) => boolean
   onCancelSelection: () => void
-  onReset: () => void
   onSelectSkill: (skillId: string) => void
   selectedSkill?: Skill
-  status: CombatStatus
-  validTargets: Combatant[]
 }
 
 export function CommandDeck({
@@ -25,15 +18,12 @@ export function CommandDeck({
   isTargeting,
   isSkillAvailable,
   onCancelSelection,
-  onReset,
   onSelectSkill,
   selectedSkill,
-  status,
-  validTargets,
 }: CommandDeckProps) {
   return (
     <section className={styles.commandDeck}>
-      {status === 'active' && activeCombatant ? (
+      {activeCombatant ? (
         <>
           <div className={styles.commandHeader}>
             <div className={styles.activePortrait}>
@@ -72,36 +62,15 @@ export function CommandDeck({
           />
 
           {selectedSkill && (
-            <SkillDetail
-              onCancel={onCancelSelection}
-              skill={selectedSkill}
-              targetCount={validTargets.length}
-            />
+            <SkillDetail onCancel={onCancelSelection} skill={selectedSkill} />
           )}
         </>
       ) : (
-        <div className={styles.resultMenu}>
-          <Text
-            size="10px"
-            c={status === 'victory' ? 'brand' : 'red'}
-            fw={800}
-            tt="uppercase"
-          >
-            Encounter complete
+        <div className={styles.waiting}>
+          <span />
+          <Text size="10px" c="dimmed" fw={900} tt="uppercase">
+            Battle in progress
           </Text>
-          <Text component="h2" fw={800} size="xl">
-            {status === 'victory'
-              ? 'The road is yours.'
-              : 'The expedition has fallen.'}
-          </Text>
-          <Text size="xs" c="dimmed">
-            {status === 'victory'
-              ? 'The party survives and may continue toward Bellweather.'
-              : 'Try a different sequence of attacks and support skills.'}
-          </Text>
-          <Button color="brand" fullWidth mt="sm" onClick={onReset}>
-            Fight again
-          </Button>
         </div>
       )}
     </section>

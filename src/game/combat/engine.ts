@@ -4,6 +4,7 @@ import type {
   CombatStatus,
   Combatant,
   DiceRoll,
+  EnemyActionResolution,
   Effect,
   HeroActionResolution,
   LogEntry,
@@ -354,20 +355,7 @@ function advanceTurn(state: CombatState): CombatState {
       continue
     }
 
-    if (active.team === 'heroes') {
-      return updated
-    }
-
-    const target = chooseEnemyTarget(updated, active)
-    const skill = active.skills[0]
-    if (!target || !skill) {
-      return resolveStatus(updated)
-    }
-
-    updated = resolveSkillEffect(updated, active, target, skill)
-    if (updated.status !== 'active') {
-      return updated
-    }
+    return updated
   }
 
   return updated
@@ -491,4 +479,44 @@ export function resolveHeroAction(
 
 export function advanceCombatTurn(state: CombatState) {
   return advanceTurn(state)
+}
+
+export function resolveEnemyAction(
+  state: CombatState,
+): EnemyActionResolution | null {
+  if (state.status !== 'active') {
+    return null
+  }
+
+  const actor = getActiveCombatant(state)
+  if (!actor || actor.team !== 'enemies') {
+    return null
+  }
+
+  const target = chooseEnemyTarget(state, actor)
+  const skill = actor.skills[0]
+  if (!target || !skill) {
+    return null
+  }
+
+  const rolls: DiceRoll[] = []
+  const previousLogLength = state.log.length
+  const updated = resolveSkillEffect(state, actor, target, skill, rolls)
+  const actionMessage = updated.log
+    .slice(previousLogLength)
+    .filter(
+      (entry) =>
+        entry.message.includes(actor.name) &&
+        entry.message.includes(skill.name),
+    )
+    .at(-1)?.message
+
+  return {
+    actorId: actor.id,
+    message: actionMessage ?? `${actor.name} uses ${skill.name}.`,
+    rolls,
+    skill,
+    state: updated,
+    targetId: target.id,
+  }
 }

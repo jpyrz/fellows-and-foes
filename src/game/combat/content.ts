@@ -5,9 +5,9 @@ const ironStrike: Skill = {
   name: 'Iron Strike',
   description: 'A reliable melee attack.',
   icon: '/assets/icons/skills/iron-strike.svg',
-  cost: 0,
+  cost: 1,
   target: 'enemy',
-  attackBonus: 5,
+  attackBonus: 4,
   effect: { type: 'damage', die: 6, bonus: 2 },
 }
 
@@ -16,9 +16,9 @@ const shieldBash: Skill = {
   name: 'Shield Bash',
   description: 'Deal light damage and make the target lose its next turn.',
   icon: '/assets/icons/skills/shield-bash.svg',
-  cost: 1,
+  cost: 2,
   target: 'enemy',
-  attackBonus: 4,
+  attackBonus: 3,
   effect: { type: 'damage', die: 4, bonus: 1, stagger: true },
 }
 
@@ -27,7 +27,7 @@ const secondWind: Skill = {
   name: 'Second Wind',
   description: 'Recover health without giving up the fight.',
   icon: '/assets/icons/skills/second-wind.svg',
-  cost: 2,
+  cost: 3,
   target: 'self',
   effect: { type: 'heal', die: 6, bonus: 3 },
 }
@@ -37,9 +37,9 @@ const quickShot: Skill = {
   name: 'Quick Shot',
   description: 'A fast, accurate ranged attack.',
   icon: '/assets/icons/skills/quick-shot.svg',
-  cost: 0,
+  cost: 1,
   target: 'enemy',
-  attackBonus: 6,
+  attackBonus: 4,
   effect: { type: 'damage', die: 6, bonus: 1 },
 }
 
@@ -48,9 +48,9 @@ const twinStrike: Skill = {
   name: 'Twin Strike',
   description: 'Make two attacks against the same target.',
   icon: '/assets/icons/skills/twin-strike.svg',
-  cost: 2,
+  cost: 3,
   target: 'enemy',
-  attackBonus: 5,
+  attackBonus: 3,
   effect: { type: 'damage', die: 4, bonus: 0, hits: 2 },
 }
 
@@ -59,7 +59,7 @@ const evasiveGuard: Skill = {
   name: 'Evasive Guard',
   description: 'Give an ally a shield that absorbs the next 5 damage.',
   icon: '/assets/icons/skills/evasive-guard.svg',
-  cost: 1,
+  cost: 2,
   target: 'ally',
   effect: { type: 'shield', amount: 5 },
 }
@@ -69,9 +69,9 @@ const arcBolt: Skill = {
   name: 'Arc Bolt',
   description: 'A focused bolt of unstable magic.',
   icon: '/assets/icons/skills/arc-bolt.svg',
-  cost: 0,
+  cost: 1,
   target: 'enemy',
-  attackBonus: 5,
+  attackBonus: 3,
   effect: { type: 'damage', die: 6, bonus: 1 },
 }
 
@@ -80,7 +80,7 @@ const mend: Skill = {
   name: 'Mend',
   description: 'Restore health to one party member.',
   icon: '/assets/icons/skills/mend.svg',
-  cost: 2,
+  cost: 3,
   target: 'ally',
   effect: { type: 'heal', die: 6, bonus: 4 },
 }
@@ -90,7 +90,7 @@ const aegis: Skill = {
   name: 'Aegis',
   description: 'Wrap an ally in a shield that absorbs 7 damage.',
   icon: '/assets/icons/skills/aegis.svg',
-  cost: 2,
+  cost: 3,
   target: 'ally',
   effect: { type: 'shield', amount: 7 },
 }
@@ -102,8 +102,8 @@ const pounce: Skill = {
   icon: '/assets/icons/combatants/ashfang.svg',
   cost: 0,
   target: 'enemy',
-  attackBonus: 4,
-  effect: { type: 'damage', die: 6, bonus: 1 },
+  attackBonus: 5,
+  effect: { type: 'damage', die: 6, bonus: 2 },
 }
 
 const mireSlam: Skill = {
@@ -113,8 +113,8 @@ const mireSlam: Skill = {
   icon: '/assets/icons/combatants/mireling.svg',
   cost: 0,
   target: 'enemy',
-  attackBonus: 3,
-  effect: { type: 'damage', die: 8, bonus: 1 },
+  attackBonus: 4,
+  effect: { type: 'damage', die: 8, bonus: 2 },
 }
 
 export function createCombatants(): Combatant[] {
@@ -128,8 +128,8 @@ export function createCombatants(): Combatant[] {
       color: 'cyan',
       maxHealth: 16,
       health: 16,
-      maxStamina: 6,
-      stamina: 6,
+      maxStamina: 4,
+      stamina: 4,
       defense: 13,
       initiative: 16,
       shield: 0,
@@ -143,11 +143,11 @@ export function createCombatants(): Combatant[] {
       portrait: '/assets/portraits/ashfang.png',
       team: 'enemies',
       color: 'orange',
-      maxHealth: 14,
-      health: 14,
+      maxHealth: 20,
+      health: 20,
       maxStamina: 0,
       stamina: 0,
-      defense: 12,
+      defense: 13,
       initiative: 14,
       shield: 0,
       staggered: false,
@@ -163,8 +163,8 @@ export function createCombatants(): Combatant[] {
       color: 'violet',
       maxHealth: 15,
       health: 15,
-      maxStamina: 7,
-      stamina: 7,
+      maxStamina: 5,
+      stamina: 5,
       defense: 11,
       initiative: 12,
       shield: 0,
@@ -178,11 +178,11 @@ export function createCombatants(): Combatant[] {
       portrait: '/assets/portraits/mireling.png',
       team: 'enemies',
       color: 'teal',
-      maxHealth: 19,
-      health: 19,
+      maxHealth: 26,
+      health: 26,
       maxStamina: 0,
       stamina: 0,
-      defense: 10,
+      defense: 12,
       initiative: 9,
       shield: 0,
       staggered: false,
@@ -198,8 +198,8 @@ export function createCombatants(): Combatant[] {
       color: 'lime',
       maxHealth: 22,
       health: 22,
-      maxStamina: 5,
-      stamina: 5,
+      maxStamina: 4,
+      stamina: 4,
       defense: 14,
       initiative: 7,
       shield: 0,
