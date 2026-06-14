@@ -12,7 +12,6 @@ interface CommandDeckProps {
   activeCombatant?: Combatant
   isTargeting: boolean
   isSkillAvailable: (skill: Skill) => boolean
-  onBeginTargeting: () => void
   onCancelSelection: () => void
   onReset: () => void
   onSelectSkill: (skillId: string) => void
@@ -25,7 +24,6 @@ export function CommandDeck({
   activeCombatant,
   isTargeting,
   isSkillAvailable,
-  onBeginTargeting,
   onCancelSelection,
   onReset,
   onSelectSkill,
@@ -75,8 +73,6 @@ export function CommandDeck({
 
           {selectedSkill && (
             <SkillDetail
-              isTargeting={isTargeting}
-              onBeginTargeting={onBeginTargeting}
               onCancel={onCancelSelection}
               skill={selectedSkill}
               targetCount={validTargets.length}

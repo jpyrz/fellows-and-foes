@@ -11,7 +11,6 @@ function resolvePendingAction() {
 
 function selectSkillAndTarget(skillId: string, targetId: string) {
   cy.get(`[data-cy="skill-${skillId}"]`).click()
-  cy.get('[data-cy="choose-target"]').click()
   cy.get(`[data-cy="target-${targetId}"]`).click()
 }
 
@@ -115,16 +114,13 @@ describe('<CombatPrototype />', () => {
     )
   })
 
-  it('lets players inspect an ability before entering target mode', () => {
+  it('shows ability details and targets immediately after selection', () => {
     cy.mount(<CombatPrototype />)
 
     cy.get('[data-cy="skill-quick-shot"]').click()
     cy.contains('h2', 'Quick Shot').should('be.visible')
-    cy.get('[data-cy="target-ashfang"]').should('not.exist')
-
-    cy.get('[data-cy="choose-target"]').click()
     cy.get('[data-cy="target-ashfang"]').should('be.visible')
-    cy.contains('Quick Shot armed').should('be.visible')
+    cy.contains('Tap one of 2 glowing targets').should('be.visible')
   })
 
   it('ends the encounter when the final enemy is defeated', () => {

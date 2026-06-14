@@ -7,41 +7,18 @@ import {
 import styles from './SkillDetail.module.scss'
 
 interface SkillDetailProps {
-  isTargeting: boolean
-  onBeginTargeting: () => void
   onCancel: () => void
   skill: Skill
   targetCount: number
 }
 
 export function SkillDetail({
-  isTargeting,
-  onBeginTargeting,
   onCancel,
   skill,
   targetCount,
 }: SkillDetailProps) {
-  if (isTargeting) {
-    return (
-      <div className={styles.targetingPrompt}>
-        <img src={skill.icon} alt="" />
-        <div>
-          <Text fw={900} size="sm">
-            {skill.name} armed
-          </Text>
-          <Text size="10px" c="brand" fw={800} tt="uppercase">
-            Tap one of {targetCount} glowing targets
-          </Text>
-        </div>
-        <Button color="gray" onClick={onCancel} size="xs" variant="subtle">
-          Cancel
-        </Button>
-      </div>
-    )
-  }
-
   return (
-    <div className={styles.detail}>
+    <div className={styles.detail} data-target-type={skill.target}>
       <div className={styles.iconFrame}>
         <img src={skill.icon} alt="" />
         <span>{skill.cost}</span>
@@ -76,18 +53,13 @@ export function SkillDetail({
       </div>
 
       <div className={styles.actions}>
-        <Button
-          color="brand"
-          data-cy="choose-target"
-          fullWidth
-          onClick={onBeginTargeting}
-        >
-          Choose target
-        </Button>
+        <Text size="10px" c="brand" fw={800} tt="uppercase">
+          Tap one of {targetCount} glowing targets
+        </Text>
         <Button
           color="gray"
-          fullWidth
           onClick={onCancel}
+          size="xs"
           variant="subtle"
         >
           Close

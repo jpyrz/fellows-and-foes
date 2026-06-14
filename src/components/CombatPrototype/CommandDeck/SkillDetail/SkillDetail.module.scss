@@ -8,13 +8,12 @@
   background:
     radial-gradient(
       circle at 10% 20%,
-      color-mix(in srgb, var(--ff-accent) 13%, transparent),
-      transparent 9rem
-    ),
-    color-mix(in srgb, var(--ff-bg-root) 76%, transparent);
-  box-shadow: inset 0 1px
-    color-mix(in srgb, var(--ff-text) 6%, transparent);
-
+      color-mix(in srgb, var(--ff-accent) 13%, var(--ff-bg-panel)),
+      var(--ff-bg-panel) 9rem
+    );
+  box-shadow:
+    0 1rem 2.5rem color-mix(in srgb, var(--ff-shadow) 68%, transparent),
+    inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
 }
 
 .iconFrame {
@@ -93,36 +92,18 @@
 }
 
 .actions {
-  display: flex;
-  grid-column: 1 / -1;
-  gap: 0.45rem;
-
-  > * {
-    flex: 1;
-  }
-}
-
-.targetingPrompt {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.6rem;
-  margin-top: 0.6rem;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid var(--ff-accent);
-  border-radius: 0.6rem;
-  background: color-mix(in srgb, var(--ff-accent) 9%, var(--ff-bg-panel));
-
-  img {
-    width: 2rem;
-    height: 2rem;
-    object-fit: contain;
-  }
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--ff-border);
 }
 
 @media (max-width: 60rem) {
   .detail {
-    position: absolute;
+    position: fixed;
     right: 0.9rem;
     bottom: calc(6.8rem + env(safe-area-inset-bottom));
     left: 0.9rem;
@@ -131,14 +112,16 @@
     box-shadow:
       0 -1rem 2.5rem color-mix(in srgb, var(--ff-shadow) 68%, transparent),
       inset 0 1px color-mix(in srgb, var(--ff-text) 6%, transparent);
+
+    &[data-target-type='ally'],
+    &[data-target-type='self'] {
+      top: clamp(9.5rem, 19dvh, 11rem);
+      bottom: auto;
+    }
   }
 
   .iconFrame {
     width: 4rem;
     height: 4rem;
-  }
-
-  .targetingPrompt {
-    margin-top: 0.45rem;
   }
 }

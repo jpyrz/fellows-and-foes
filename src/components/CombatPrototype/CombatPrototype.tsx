@@ -92,7 +92,10 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
       (combatant) => combatant.id === targetId,
     )
 
-    if (!target || !validTargets.some((validTarget) => validTarget.id === targetId)) {
+    if (
+      !target ||
+      !validTargets.some((validTarget) => validTarget.id === targetId)
+    ) {
       return
     }
 
@@ -203,7 +206,7 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
 
   function selectSkill(skillId: string) {
     setSelectedSkillId(skillId)
-    setIsTargeting(false)
+    setIsTargeting(true)
   }
 
   function cancelSelection() {
@@ -259,7 +262,6 @@ export function CombatPrototype({ initialState }: CombatPrototypeProps) {
           activeCombatant={activeCombatant}
           isTargeting={isTargeting}
           isSkillAvailable={isSkillAvailable}
-          onBeginTargeting={() => setIsTargeting(true)}
           onCancelSelection={cancelSelection}
           onReset={resetCombat}
           onSelectSkill={selectSkill}
