@@ -5,6 +5,8 @@ const STORAGE_KEY = 'fellows-and-foes-save'
 export const emptyGameSave: GameSave = {
   version: 1,
   character: null,
+  characters: [],
+  activeCharacterId: null,
   activeRuns: [],
   completedRuns: [],
 }
@@ -23,10 +25,25 @@ export const localGameRepository: GameRepository = {
 
       const parsed = JSON.parse(raw) as Partial<GameSave>
       if (parsed.version !== 1) return emptyGameSave
+      const legacyCharacter = parsed.character ?? null
+      const characters = parsed.characters?.length
+        ? parsed.characters
+        : legacyCharacter
+          ? [legacyCharacter]
+          : []
+      const activeCharacterId =
+        parsed.activeCharacterId ??
+        legacyCharacter?.id ??
+        characters[0]?.id ??
+        null
 
       return {
         version: 1,
-        character: parsed.character ?? null,
+        character:
+          characters.find((character) => character.id === activeCharacterId) ??
+          legacyCharacter,
+        characters,
+        activeCharacterId,
         activeRuns: parsed.activeRuns ?? [],
         completedRuns: parsed.completedRuns ?? [],
       }

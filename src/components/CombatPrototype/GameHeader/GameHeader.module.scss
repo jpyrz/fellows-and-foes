@@ -36,25 +36,6 @@
   white-space: nowrap;
 }
 
-.menuButton {
-  color: var(--ff-text-muted);
-
-  span {
-    color: var(--ff-accent);
-    font-size: 1.45rem;
-    line-height: 1;
-  }
-}
-
-.themeOption {
-  border-left: 2px solid transparent;
-
-  &[data-active] {
-    border-left-color: var(--ff-accent);
-    background: color-mix(in srgb, var(--ff-accent) 10%, transparent);
-  }
-}
-
 @media (max-width: 30rem) {
   .topBar {
     padding-inline: 0.9rem;

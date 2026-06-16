@@ -16,6 +16,7 @@ interface EncounterHudProps {
   turnOrder: string[]
   campaignLabel?: string
   encounterTitle?: string
+  canReset?: boolean
 }
 
 export function EncounterHud({
@@ -27,6 +28,7 @@ export function EncounterHud({
   status,
   turnOrder,
   campaignLabel = 'Old Road · Encounter 01',
+  canReset = true,
   encounterTitle = 'Smoke in the Mire',
 }: EncounterHudProps) {
   return (
@@ -65,15 +67,17 @@ export function EncounterHud({
           >
             Log
           </Button>
-          <ActionIcon
-            className={styles.resetButton}
-            variant="subtle"
-            color="gray"
-            aria-label="Reset encounter"
-            onClick={onReset}
-          >
-            ↻
-          </ActionIcon>
+          {canReset && (
+            <ActionIcon
+              className={styles.resetButton}
+              variant="subtle"
+              color="gray"
+              aria-label="Reset encounter"
+              onClick={onReset}
+            >
+              ↻
+            </ActionIcon>
+          )}
         </Group>
       </div>
 

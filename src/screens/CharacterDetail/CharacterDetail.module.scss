@@ -1,0 +1,151 @@
+.sheet {
+  display: grid;
+  gap: 1rem;
+  max-width: 66rem;
+  margin: 0 auto;
+}
+
+.identity,
+.panel {
+  border: 1px solid var(--ff-border);
+  background: var(--ff-bg-panel);
+}
+
+.identity {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.identity img {
+  width: 8rem;
+  height: 8.5rem;
+  object-fit: cover;
+  border: 2px solid var(--ff-border-strong);
+  background: var(--ff-portrait-paper);
+}
+
+.identity span,
+.heading span {
+  color: var(--ff-accent);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.identity h1,
+.heading h2 {
+  margin: 0.2rem 0;
+  font-family: Georgia, serif;
+}
+
+.identity h1 {
+  font-size: clamp(2rem, 7vw, 4rem);
+  line-height: 0.95;
+}
+
+.identity p,
+.identity small,
+.bio {
+  color: var(--ff-text-muted);
+  text-transform: capitalize;
+}
+
+.panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.stats,
+.derived {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+
+.stats > div,
+.derived span {
+  position: relative;
+  display: grid;
+  min-height: 4rem;
+  place-content: center;
+  border: 1px solid var(--ff-border);
+  background: var(--ff-surface);
+  text-align: center;
+}
+
+.stats strong {
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+}
+
+.stats button {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  border: 0;
+  border-radius: 50%;
+  color: var(--ff-on-accent);
+  background: var(--ff-accent);
+}
+
+.spells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 0.7rem;
+}
+
+.spells article {
+  display: grid;
+  grid-template-columns: 3.4rem 1fr;
+  gap: 0.7rem;
+  padding: 0.75rem;
+  border: 1px solid var(--ff-border);
+  background: var(--ff-surface);
+}
+
+.spells img {
+  width: 3.4rem;
+  height: 3.4rem;
+}
+
+.spells strong,
+.spells small {
+  display: block;
+}
+
+.spells p {
+  margin: 0.25rem 0;
+  color: var(--ff-text-muted);
+  font-size: 0.8rem;
+}
+
+.spells small {
+  color: var(--ff-accent);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 42rem) {
+  .identity {
+    grid-template-columns: 5.5rem 1fr;
+  }
+
+  .identity img {
+    width: 5.5rem;
+    height: 6rem;
+  }
+
+  .identity button {
+    grid-column: 1 / -1;
+  }
+
+  .stats,
+  .derived {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

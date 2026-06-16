@@ -168,6 +168,8 @@ export interface CampaignRun {
 export interface GameSave {
   version: 1
   character: PersistentCharacter | null
+  characters: PersistentCharacter[]
+  activeCharacterId: string | null
   activeRuns: CampaignRun[]
   completedRuns: CampaignRun[]
 }

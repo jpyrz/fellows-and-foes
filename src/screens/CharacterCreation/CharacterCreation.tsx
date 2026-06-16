@@ -6,7 +6,7 @@ import {
   TextInput,
 } from '@mantine/core'
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
 import { useGame } from '../../game/campaign/gameContext'
 import { portraitOptions } from '../../game/campaign/content'
@@ -38,7 +38,7 @@ const traits: PersonalityTrait[] = [
 const statNames = Object.keys(statLabels) as StatName[]
 
 export function CharacterCreation() {
-  const { createCharacter, save } = useGame()
+  const { createCharacter } = useGame()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
@@ -53,10 +53,6 @@ export function CharacterCreation() {
     spirit: 1,
   })
   const [skillIds, setSkillIds] = useState<string[]>([])
-
-  if (save.character) {
-    return <Navigate to="/" replace />
-  }
 
   const statsValid =
     Object.values(stats)

@@ -11,7 +11,7 @@ import type { StatName } from '../../game/campaign/types'
 import styles from './Dashboard.module.scss'
 
 export function Dashboard() {
-  const { allocateStat, save } = useGame()
+  const { allocateStat, save, setActiveCharacter } = useGame()
   const navigate = useNavigate()
   const character = save.character
 
@@ -74,7 +74,9 @@ export function Dashboard() {
                 <strong>{character.stats[stat]}</strong>
                 {character.unspentStatPoints > 0 &&
                   character.stats[stat] < 5 && (
-                    <button onClick={() => allocateStat(stat)}>+</button>
+                    <button onClick={() => allocateStat(character.id, stat)}>
+                      +
+                    </button>
                   )}
               </div>
             ))}
@@ -85,6 +87,62 @@ export function Dashboard() {
               {character.unspentStatPoints === 1 ? '' : 's'} ready to spend
             </div>
           )}
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeading}>
+            <div>
+              <span>Persistent roster</span>
+              <h2>Your fellows</h2>
+            </div>
+            <Button
+              color="brand"
+              variant="light"
+              onClick={() => navigate('/character/create')}
+              data-cy="create-character"
+            >
+              Create another fellow
+            </Button>
+          </div>
+          <div className={styles.rosterGrid}>
+            {save.characters.map((fellow) => (
+              <article
+                key={fellow.id}
+                className={styles.rosterCard}
+                data-active={fellow.id === save.activeCharacterId || undefined}
+              >
+                <button
+                  className={styles.rosterMain}
+                  onClick={() => navigate(`/characters/${fellow.id}`)}
+                  data-cy={`character-card-${fellow.id}`}
+                >
+                  <img src={fellow.portrait} alt="" />
+                  <span>
+                    <strong>{fellow.name}</strong>
+                    <small>
+                      Level {fellow.level} · {fellow.unlockedSkillIds.length}{' '}
+                      spells
+                    </small>
+                    <em>
+                      {fellow.background} · {fellow.trait}
+                    </em>
+                  </span>
+                </button>
+                <Button
+                  size="compact-xs"
+                  variant={
+                    fellow.id === save.activeCharacterId ? 'filled' : 'subtle'
+                  }
+                  color="brand"
+                  onClick={() => setActiveCharacter(fellow.id)}
+                >
+                  {fellow.id === save.activeCharacterId
+                    ? 'Active'
+                    : 'Make active'}
+                </Button>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className={styles.section}>

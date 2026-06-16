@@ -1,0 +1,158 @@
+.partyView {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.partyView > header {
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+  border: 1px solid var(--ff-border);
+  background: var(--ff-bg-panel);
+}
+
+.partyView header span,
+.identity span {
+  color: var(--ff-accent);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.partyView h1,
+.identity h2 {
+  margin: 0.25rem 0;
+  font-family: Georgia, serif;
+}
+
+.partyView h1 {
+  font-size: clamp(2.4rem, 8vw, 4.4rem);
+}
+
+.partyView p {
+  color: var(--ff-text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--ff-border);
+  background: var(--ff-bg-panel);
+}
+
+.identity {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.identity img {
+  width: 5rem;
+  height: 5.4rem;
+  object-fit: cover;
+  border: 1px solid var(--ff-border-strong);
+  background: var(--ff-portrait-paper);
+}
+
+.identity p {
+  margin: 0;
+}
+
+.bars,
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.stats {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.bars span,
+.stats span,
+.items span {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem;
+  border: 1px solid var(--ff-border);
+  color: var(--ff-text-muted);
+  background: var(--ff-surface);
+  font-size: 0.68rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.bars strong,
+.stats strong {
+  color: var(--ff-text);
+  font-family: Georgia, serif;
+  font-size: 1rem;
+}
+
+.subsection {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.subsection h3 {
+  margin: 0;
+  color: var(--ff-accent);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.spells,
+.items {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.spells div {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem;
+  border: 1px solid var(--ff-border);
+  background: var(--ff-surface);
+}
+
+.spells img {
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.spells strong,
+.spells small {
+  display: block;
+}
+
+.spells small {
+  color: var(--ff-text-muted);
+}
+
+.partyView footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 38rem) {
+  .bars,
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .partyView footer {
+    flex-direction: column;
+  }
+}

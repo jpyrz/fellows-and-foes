@@ -20,6 +20,18 @@
 .footer { display:flex; align-items:center; justify-content:space-between; padding-top:1rem; border-top:1px solid var(--ff-border); }
 .footer > div { display:flex; align-items:center; gap:1rem; }
 .footer span { color:var(--ff-text-muted); font-size:.75rem; }
+.loadouts { display:grid; gap:1rem; }
+.loadoutCard { display:grid; gap:.8rem; padding:1rem; border:1px solid var(--ff-border); background:var(--ff-bg-panel); }
+.loadoutHeading { display:flex; align-items:center; gap:.75rem; }
+.loadoutHeading img { width:3.4rem; height:3.7rem; object-fit:cover; background:var(--ff-portrait-paper); border:1px solid var(--ff-border); }
+.loadoutHeading strong,.loadoutHeading small { display:block; }
+.loadoutHeading small { color:var(--ff-text-muted); }
+.spellPicker { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap:.55rem; }
+.spellPicker button { display:grid; grid-template-columns:2.7rem 1fr; gap:.55rem; align-items:center; padding:.55rem; border:1px solid var(--ff-border); color:inherit; background:var(--ff-surface); text-align:left; }
+.spellPicker button[data-selected] { border-color:var(--ff-accent); background:color-mix(in srgb,var(--ff-accent) 10%,var(--ff-surface)); }
+.spellPicker img { width:2.7rem; height:2.7rem; }
+.spellPicker strong,.spellPicker small { display:block; }
+.spellPicker small { color:var(--ff-text-muted); font-size:.65rem; text-transform:uppercase; }
 @media(max-width:48rem){
   .campaignSeal { display:none; }
   .party { grid-template-columns:1fr; }

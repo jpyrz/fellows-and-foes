@@ -17,6 +17,7 @@ import {
 } from './repository'
 import {
   GameContext,
+  type CampaignPartySelection,
   type CharacterDraft,
   type CheckpointRewards,
   type GameContextValue,
@@ -34,6 +35,34 @@ import type {
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function getActiveCharacter(save: GameSave) {
+  return (
+    save.characters.find(
+      (character) => character.id === save.activeCharacterId,
+    ) ??
+    save.character ??
+    save.characters[0] ??
+    null
+  )
+}
+
+function syncActiveCharacter(
+  save: GameSave,
+  characters: PersistentCharacter[],
+  activeCharacterId = save.activeCharacterId,
+): GameSave {
+  const character =
+    characters.find((candidate) => candidate.id === activeCharacterId) ??
+    characters[0] ??
+    null
+  return {
+    ...save,
+    character,
+    characters,
+    activeCharacterId: character?.id ?? null,
+  }
 }
 
 function makeCheckpoint(run: Omit<CampaignRun, 'checkpoint'>) {
@@ -169,58 +198,114 @@ export function GameProvider({
       unspentStatPoints: 0,
       createdAt: new Date().toISOString(),
     }
-    commit({ ...save, character })
+    commit(
+      syncActiveCharacter(
+        save,
+        [...save.characters, character],
+        save.activeCharacterId ?? character.id,
+      ),
+    )
     return character
   }
 
+  function setActiveCharacter(characterId: string) {
+    commit(syncActiveCharacter(save, save.characters, characterId))
+  }
+
+  function getCharacter(characterId: string) {
+    return save.characters.find((character) => character.id === characterId)
+  }
+
   function updateCharacterCosmetics(
+    characterId: string,
     updates: Pick<PersistentCharacter, 'name' | 'portrait' | 'biography'>,
   ) {
-    if (!save.character) return
-    commit({ ...save, character: { ...save.character, ...updates } })
+    commit(
+      syncActiveCharacter(
+        save,
+        save.characters.map((character) =>
+          character.id === characterId
+            ? { ...character, ...updates }
+            : character,
+        ),
+      ),
+    )
   }
 
-  function allocateStat(stat: StatName) {
-    if (!save.character) return
-    commit({ ...save, character: spendStatPoint(save.character, stat) })
+  function allocateStat(characterId: string, stat: StatName) {
+    commit(
+      syncActiveCharacter(
+        save,
+        save.characters.map((character) =>
+          character.id === characterId
+            ? spendStatPoint(character, stat)
+            : character,
+        ),
+      ),
+    )
   }
 
-  function createCampaign(companionIds: string[]) {
-    if (!save.character) throw new Error('A character is required.')
-    const campaign = getCampaignDefinition('the-old-road')
-    if (!campaign) throw new Error('Campaign content is missing.')
-
-    const derived = deriveCombatStats(save.character.stats)
-    const hero: PartyMemberSnapshot = {
-      id: save.character.id,
-      characterId: save.character.id,
+  function snapshotCharacter(
+    character: PersistentCharacter,
+    equippedSkillIds: string[],
+  ): PartyMemberSnapshot {
+    const derived = deriveCombatStats(character.stats)
+    return {
+      id: character.id,
+      characterId: character.id,
       owner: 'player',
-      name: save.character.name,
+      name: character.name,
       title: 'Roadbound Fellow',
-      portrait: save.character.portrait,
-      background: save.character.background,
-      trait: save.character.trait,
-      stats: save.character.stats,
-      level: save.character.level,
+      portrait: character.portrait,
+      background: character.background,
+      trait: character.trait,
+      stats: character.stats,
+      level: character.level,
       ...derived,
       health: derived.maxHealth,
       stamina: derived.maxStamina,
-      equippedSkillIds: save.character.unlockedSkillIds.slice(0, 3),
-      unlockedSkillIds: save.character.unlockedSkillIds,
+      equippedSkillIds,
+      unlockedSkillIds: character.unlockedSkillIds,
       inventory: [{ itemId: 'healing-draught', quantity: 1 }],
     }
-    const selectedCompanions = companionDefinitions
-      .filter((companion) => companionIds.includes(companion.id))
-      .map((companion) => structuredClone(companion))
+  }
+
+  function createCampaign(partySelection: CampaignPartySelection[]) {
+    const leaderSelection = partySelection.find(
+      (selection) => selection.source === 'character',
+    )
+    const leader = leaderSelection
+      ? getCharacter(leaderSelection.memberId)
+      : getActiveCharacter(save)
+    if (!leader) throw new Error('A character is required.')
+    const campaign = getCampaignDefinition('the-old-road')
+    if (!campaign) throw new Error('Campaign content is missing.')
+
+    const party = partySelection.map((selection) => {
+      if (selection.source === 'character') {
+        const character = getCharacter(selection.memberId)
+        if (!character) throw new Error('Character not found.')
+        return snapshotCharacter(character, selection.equippedSkillIds)
+      }
+
+      const companion = companionDefinitions.find(
+        (candidate) => candidate.id === selection.memberId,
+      )
+      if (!companion) throw new Error('Companion not found.')
+      return {
+        ...structuredClone(companion),
+        equippedSkillIds: selection.equippedSkillIds,
+      }
+    })
     const now = new Date().toISOString()
     const withoutCheckpoint: Omit<CampaignRun, 'checkpoint'> = {
       id: makeId('run'),
       campaignId: campaign.id,
-      characterId: save.character.id,
+      characterId: leader.id,
       status: 'active',
       sceneId: campaign.openingSceneId,
       chapter: campaign.subtitle,
-      party: [hero, ...selectedCompanions],
+      party,
       flags: [],
       completedActionIds: [],
       revealedActionIds: [],
@@ -365,10 +450,17 @@ export function GameProvider({
     })
     const rewardId = 'boss-smoke-in-the-mire'
     const rewardAvailable = !run.claimedRewardIds.includes(rewardId)
-    const character =
-      rewardAvailable && save.character
-        ? awardCharacterXp(save.character, 60)
-        : save.character
+    const playerIds = run.party
+      .filter((member) => member.owner === 'player' && member.characterId)
+      .map((member) => member.characterId!)
+    const characters =
+      rewardAvailable
+        ? save.characters.map((character) =>
+            playerIds.includes(character.id)
+              ? awardCharacterXp(character, 60)
+              : character,
+          )
+        : save.characters
     const updated: CampaignRun = {
       ...run,
       party,
@@ -380,8 +472,7 @@ export function GameProvider({
       updatedAt: new Date().toISOString(),
     }
     commit({
-      ...save,
-      character,
+      ...syncActiveCharacter(save, characters),
       activeRuns: save.activeRuns.map((candidate) =>
         candidate.id === runId ? updated : candidate,
       ),
@@ -419,20 +510,29 @@ export function GameProvider({
     )
     const checkpointRewardId = 'checkpoint-wayfarer-shrine'
     const rewardAvailable = !run.claimedRewardIds.includes(checkpointRewardId)
-    let character =
-      rewardAvailable && save.character
-        ? awardCharacterXp(save.character, 40)
-        : save.character
-    const heroSkill = rewards.skillsByMemberId[run.characterId]
-    if (
-      character &&
-      heroSkill &&
-      !character.unlockedSkillIds.includes(heroSkill)
-    ) {
-      character = {
-        ...character,
-        unlockedSkillIds: [...character.unlockedSkillIds, heroSkill],
-      }
+    const playerIds = run.party
+      .filter((member) => member.owner === 'player' && member.characterId)
+      .map((member) => member.characterId!)
+    let characters =
+      rewardAvailable
+        ? save.characters.map((character) =>
+            playerIds.includes(character.id)
+              ? awardCharacterXp(character, 40)
+              : character,
+          )
+        : save.characters
+    for (const characterId of playerIds) {
+      const heroSkill = rewards.skillsByMemberId[characterId]
+      if (!heroSkill) continue
+      characters = characters.map((character) =>
+        character.id === characterId &&
+        !character.unlockedSkillIds.includes(heroSkill)
+          ? {
+              ...character,
+              unlockedSkillIds: [...character.unlockedSkillIds, heroSkill],
+            }
+          : character,
+      )
     }
 
     const withoutCheckpoint: Omit<CampaignRun, 'checkpoint'> = {
@@ -449,8 +549,7 @@ export function GameProvider({
       checkpoint: makeCheckpoint(withoutCheckpoint),
     }
     commit({
-      ...save,
-      character,
+      ...syncActiveCharacter(save, characters),
       activeRuns: save.activeRuns.map((candidate) =>
         candidate.id === runId ? updated : candidate,
       ),
@@ -475,6 +574,15 @@ export function GameProvider({
     })
   }
 
+  function abandonCampaign(runId: string) {
+    commit({
+      ...save,
+      activeRuns: save.activeRuns.filter(
+        (candidate) => candidate.id !== runId,
+      ),
+    })
+  }
+
   function resetAll() {
     repository.clear()
     setSaveState(emptyGameSave)
@@ -483,10 +591,13 @@ export function GameProvider({
   const value: GameContextValue = {
     save,
     createCharacter,
+    setActiveCharacter,
+    getCharacter,
     updateCharacterCosmetics,
     allocateStat,
     createCampaign,
     getRun,
+    abandonCampaign,
     resolveSceneAction,
     travelTo,
     resolveBattle,

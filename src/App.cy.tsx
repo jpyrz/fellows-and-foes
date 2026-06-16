@@ -392,11 +392,11 @@ describe('<CombatPrototype />', () => {
   })
 
   it('switches color themes and remembers the selection', () => {
-    cy.mount(<CombatPrototype />)
+    window.history.replaceState({}, '', '/settings')
+    cy.mount(<App />)
 
     cy.get('html').should('have.attr', 'data-ff-theme', 'verdant')
-    cy.get('button[aria-label="Theme: Verdant"]').click()
-    cy.get('[role="menuitem"]').contains('Ember').click()
+    cy.contains('button', 'Ember').click()
 
     cy.get('html').should('have.attr', 'data-ff-theme', 'ember')
     cy.window().then((window) => {
@@ -404,7 +404,7 @@ describe('<CombatPrototype />', () => {
         'ember',
       )
     })
-    cy.get('button[aria-label="Theme: Ember"]').should('be.visible')
+    cy.contains('button', 'Ember').should('have.attr', 'data-active')
   })
 })
 
@@ -472,6 +472,7 @@ describe('campaign alpha flow', () => {
       delete run.currentEncounterId
       run.claimedRewardIds.push('boss-smoke-in-the-mire')
       stored.character.xp = 60
+      stored.characters[0].xp = 60
       window.localStorage.setItem(
         'fellows-and-foes-save',
         JSON.stringify(stored),
@@ -506,6 +507,7 @@ describe('campaign alpha flow', () => {
       expect(stored.activeRuns).to.have.length(0)
       expect(stored.completedRuns[0].id).to.equal(campaignRunId)
       expect(stored.character.unlockedSkillIds).to.include('ember-lance')
+      expect(stored.characters[0].unlockedSkillIds).to.include('ember-lance')
     })
   })
 })

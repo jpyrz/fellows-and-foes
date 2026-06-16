@@ -20,15 +20,25 @@ export interface CheckpointRewards {
   itemRecipientId: string
 }
 
+export interface CampaignPartySelection {
+  memberId: string
+  source: 'character' | 'companion'
+  equippedSkillIds: string[]
+}
+
 export interface GameContextValue {
   save: GameSave
   createCharacter(draft: CharacterDraft): PersistentCharacter
+  setActiveCharacter(characterId: string): void
+  getCharacter(characterId: string): PersistentCharacter | undefined
   updateCharacterCosmetics(
+    characterId: string,
     updates: Pick<PersistentCharacter, 'name' | 'portrait' | 'biography'>,
   ): void
-  allocateStat(stat: StatName): void
-  createCampaign(companionIds: string[]): CampaignRun
+  allocateStat(characterId: string, stat: StatName): void
+  createCampaign(party: CampaignPartySelection[]): CampaignRun
   getRun(runId: string): CampaignRun | undefined
+  abandonCampaign(runId: string): void
   resolveSceneAction(
     runId: string,
     action: SceneActionDefinition,

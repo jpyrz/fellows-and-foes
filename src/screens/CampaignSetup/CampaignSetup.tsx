@@ -1,5 +1,5 @@
 import { Badge, Button } from '@mantine/core'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
 import { useGame } from '../../game/campaign/gameContext'
@@ -7,32 +7,123 @@ import {
   companionDefinitions,
   oldRoadCampaign,
 } from '../../game/campaign/content'
+import { campaignSkills } from '../../game/campaign/skills'
+import type { CampaignPartySelection } from '../../game/campaign/gameContext'
 import styles from './CampaignSetup.module.scss'
+
+type Candidate = {
+  id: string
+  source: 'character' | 'companion'
+  name: string
+  title: string
+  portrait: string
+  subtitle: string
+  skillIds: string[]
+}
 
 export function CampaignSetup() {
   const { createCampaign, save } = useGame()
   const navigate = useNavigate()
-  const [selected, setSelected] = useState<string[]>([])
+  const candidates = useMemo<Candidate[]>(
+    () => [
+      ...save.characters.map((character) => ({
+        id: character.id,
+        source: 'character' as const,
+        name: character.name,
+        title: `Level ${character.level} fellow`,
+        portrait: character.portrait,
+        subtitle: `${character.unlockedSkillIds.length} unlocked spells`,
+        skillIds: character.unlockedSkillIds,
+      })),
+      ...companionDefinitions.map((companion) => ({
+        id: companion.id,
+        source: 'companion' as const,
+        name: companion.name,
+        title: companion.title,
+        portrait: companion.portrait,
+        subtitle: `${companion.background} · ${companion.trait}`,
+        skillIds: companion.unlockedSkillIds,
+      })),
+    ],
+    [save.characters],
+  )
+  const initialSelectedIds = save.activeCharacterId
+    ? [save.activeCharacterId]
+    : []
+  const initialActiveCandidate = candidates.find(
+    (entry) => entry.id === save.activeCharacterId,
+  )
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds)
+  const [loadouts, setLoadouts] = useState<Record<string, string[]>>(() =>
+    initialActiveCandidate
+      ? { [initialActiveCandidate.id]: initialActiveCandidate.skillIds.slice(0, 3) }
+      : {},
+  )
 
-  if (!save.character) return <Navigate to="/character/create" replace />
+  if (save.characters.length === 0) {
+    return <Navigate to="/character/create" replace />
+  }
   if (save.activeRuns.some((run) => run.campaignId === oldRoadCampaign.id)) {
     return <Navigate to="/" replace />
   }
 
-  function toggleCompanion(id: string) {
-    setSelected((current) =>
-      current.includes(id)
+  function toggleMember(id: string) {
+    setSelectedIds((current) => {
+      const next = current.includes(id)
         ? current.filter((candidate) => candidate !== id)
-        : current.length < 2
+        : current.length < 3
           ? [...current, id]
-          : current,
-    )
+          : current
+
+      setLoadouts((existing) => {
+        const updated = { ...existing }
+        for (const memberId of next) {
+          const candidate = candidates.find((entry) => entry.id === memberId)
+          if (!updated[memberId] && candidate) {
+            updated[memberId] = candidate.skillIds.slice(0, 3)
+          }
+        }
+        return updated
+      })
+      return next
+    })
+  }
+
+  function toggleSkill(memberId: string, skillId: string) {
+    setLoadouts((current) => {
+      const currentLoadout = current[memberId] ?? []
+      return {
+        ...current,
+        [memberId]: currentLoadout.includes(skillId)
+          ? currentLoadout.filter((id) => id !== skillId)
+          : currentLoadout.length < 3
+            ? [...currentLoadout, skillId]
+            : currentLoadout,
+      }
+    })
   }
 
   function begin() {
-    const run = createCampaign(selected)
+    const party: CampaignPartySelection[] = selectedIds.map((memberId) => {
+      const candidate = candidates.find((entry) => entry.id === memberId)!
+      return {
+        memberId,
+        source: candidate.source,
+        equippedSkillIds: loadouts[memberId] ?? candidate.skillIds.slice(0, 3),
+      }
+    })
+    const run = createCampaign(party)
     window.setTimeout(() => navigate(`/campaign/${run.id}`), 0)
   }
+
+  const ready =
+    selectedIds.length === 3 &&
+    selectedIds.some((id) =>
+      candidates.some(
+        (candidate) => candidate.id === id && candidate.source === 'character',
+      ),
+    ) &&
+    selectedIds.every((id) => (loadouts[id] ?? []).length === 3)
 
   return (
     <GameShell title="Form an Expedition">
@@ -52,53 +143,99 @@ export function CampaignSetup() {
         <section>
           <div className={styles.heading}>
             <span>Solo expedition</span>
-            <h2>Choose two companions.</h2>
+            <h2>Choose three party members.</h2>
             <p>
-              You control the entire party. Companion growth belongs to this
-              run, while {save.character.name} carries permanent rewards home.
+              Custom fellows keep permanent growth. Premade fellows still work
+              as run-only allies when your roster is thin.
             </p>
           </div>
           <div className={styles.party}>
-            <article className={styles.hero} data-selected>
-              <img src={save.character.portrait} alt="" />
-              <div>
-                <strong>{save.character.name}</strong>
-                <span>Your fellow · Level {save.character.level}</span>
-              </div>
-              <Badge color="brand">Leader</Badge>
-            </article>
-            {companionDefinitions.map((companion) => (
+            {candidates.map((candidate) => (
               <button
-                key={companion.id}
+                key={`${candidate.source}-${candidate.id}`}
                 className={styles.companion}
-                data-selected={selected.includes(companion.id) || undefined}
-                onClick={() => toggleCompanion(companion.id)}
-                data-cy={`companion-${companion.id}`}
+                data-selected={selectedIds.includes(candidate.id) || undefined}
+                onClick={() => toggleMember(candidate.id)}
+                data-cy={`${candidate.source}-${candidate.id}`}
               >
-                <img src={companion.portrait} alt="" />
+                <img src={candidate.portrait} alt="" />
                 <span>
-                  <strong>{companion.name}</strong>
-                  <small>{companion.title}</small>
-                  <em>
-                    {companion.background} · {companion.trait}
-                  </em>
+                  <strong>{candidate.name}</strong>
+                  <small>{candidate.title}</small>
+                  <em>{candidate.subtitle}</em>
                 </span>
-                <i>{selected.includes(companion.id) ? 'Chosen' : 'Choose'}</i>
+                <i>
+                  {selectedIds.includes(candidate.id)
+                    ? 'Chosen'
+                    : candidate.source === 'character'
+                      ? 'Roster'
+                      : 'Premade'}
+                </i>
               </button>
             ))}
           </div>
         </section>
+
+        {selectedIds.length > 0 && (
+          <section className={styles.loadouts}>
+            <div className={styles.heading}>
+              <span>Campaign attunement</span>
+              <h2>Select three spells each.</h2>
+              <p>
+                You can rebuild loadouts at the start of every campaign from
+                each fellow’s unlocked spell pool.
+              </p>
+            </div>
+            {selectedIds.map((memberId) => {
+              const candidate = candidates.find((entry) => entry.id === memberId)
+              if (!candidate) return null
+              const selectedSkills = loadouts[memberId] ?? []
+              return (
+                <article key={memberId} className={styles.loadoutCard}>
+                  <div className={styles.loadoutHeading}>
+                    <img src={candidate.portrait} alt="" />
+                    <span>
+                      <strong>{candidate.name}</strong>
+                      <small>{selectedSkills.length}/3 spells selected</small>
+                    </span>
+                  </div>
+                  <div className={styles.spellPicker}>
+                    {candidate.skillIds.map((skillId) => {
+                      const skill = campaignSkills[skillId]
+                      if (!skill) return null
+                      return (
+                        <button
+                          key={skillId}
+                          data-selected={
+                            selectedSkills.includes(skillId) || undefined
+                          }
+                          onClick={() => toggleSkill(memberId, skillId)}
+                        >
+                          <img src={skill.icon} alt="" />
+                          <span>
+                            <strong>{skill.name}</strong>
+                            <small>Tier {skill.tier} · Cost {skill.cost}</small>
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </article>
+              )
+            })}
+          </section>
+        )}
 
         <footer className={styles.footer}>
           <Button variant="subtle" color="gray" onClick={() => navigate('/')}>
             Back
           </Button>
           <div>
-            <span>{selected.length}/2 companions</span>
+            <span>{selectedIds.length}/3 party members</span>
             <Button
               color="brand"
               size="md"
-              disabled={selected.length !== 2}
+              disabled={!ready}
               onClick={begin}
               data-cy="begin-campaign"
             >

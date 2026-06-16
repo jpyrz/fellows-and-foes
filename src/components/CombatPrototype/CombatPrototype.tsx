@@ -514,6 +514,7 @@ export function CombatPrototype({
           round={combat.round}
           status={combat.status}
           turnOrder={combat.turnOrder}
+          canReset={!onComplete}
           campaignLabel={
             campaignTitle ? `${campaignTitle} · Encounter 01` : undefined
           }

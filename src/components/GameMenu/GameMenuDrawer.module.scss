@@ -1,0 +1,139 @@
+.menuButton {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-content: center;
+  gap: 0.3rem;
+  border: 1px solid var(--ff-border);
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--ff-accent) 8%, transparent),
+      transparent
+    ),
+    var(--ff-surface);
+}
+
+.menuButton span {
+  width: 1.25rem;
+  height: 2px;
+  background: var(--ff-accent);
+}
+
+.drawerTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.drawerTitle span {
+  display: grid;
+  width: 2.15rem;
+  height: 2.15rem;
+  place-items: center;
+  color: var(--ff-on-accent);
+  font-family: Georgia, serif;
+  font-size: 0.65rem;
+  font-weight: 900;
+  background: var(--ff-accent);
+  transform: rotate(-3deg);
+  clip-path: polygon(8% 0, 92% 0, 100% 8%, 100% 92%, 92% 100%, 8% 100%, 0 92%, 0 8%);
+}
+
+.drawerTitle strong {
+  font-family: Georgia, serif;
+}
+
+.drawer {
+  display: grid;
+  gap: 1rem;
+}
+
+.menuHero {
+  padding: 1rem;
+  border: 1px solid var(--ff-border);
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--ff-accent) 16%, transparent),
+      transparent 12rem
+    ),
+    var(--ff-surface);
+  clip-path: polygon(0.45rem 0, 100% 0, 100% calc(100% - 0.45rem), calc(100% - 0.45rem) 100%, 0 100%, 0 0.45rem);
+}
+
+.menuHero span,
+.footer span,
+.menuItem small {
+  color: var(--ff-accent);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.menuHero h2 {
+  margin: 0.3rem 0;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.menuHero p {
+  margin: 0;
+  color: var(--ff-text-muted);
+  font-size: 0.85rem;
+}
+
+.navigation {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.menuItem {
+  height: auto;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--ff-border);
+  border-radius: 0;
+  color: var(--ff-text);
+  background: var(--ff-surface);
+  text-align: left;
+  clip-path: polygon(0.35rem 0, 100% 0, 100% calc(100% - 0.35rem), calc(100% - 0.35rem) 100%, 0 100%, 0 0.35rem);
+}
+
+.menuItem[data-active] {
+  border-color: var(--ff-border-strong);
+  background: color-mix(in srgb, var(--ff-accent) 10%, var(--ff-surface));
+}
+
+.menuItem span,
+.menuItem strong,
+.menuItem small {
+  display: block;
+}
+
+.menuItem strong {
+  margin-top: 0.16rem;
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.menuItem i {
+  color: var(--ff-accent);
+  font-family: Georgia, serif;
+  font-size: 1.8rem;
+  font-style: normal;
+}
+
+.footer {
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--ff-border);
+}
+
+.footer strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--ff-text-muted);
+  font-size: 0.8rem;
+}
