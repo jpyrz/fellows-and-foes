@@ -1,5 +1,7 @@
 import { type PropsWithChildren, useState } from 'react'
 import type { CombatState } from '../combat/types'
+import { achievementDefinitions } from './achievements'
+import { classDefinitions } from './classes'
 import {
   companionDefinitions,
   getCampaignDefinition,
@@ -63,6 +65,95 @@ function syncActiveCharacter(
     characters,
     activeCharacterId: character?.id ?? null,
   }
+}
+
+function getClassRewardSkillIds(save: GameSave, classId: PersistentCharacter['classId']) {
+  const classDefinition = classDefinitions[classId]
+  return save.achievements.flatMap((achievement) => {
+    if (!achievement.claimedAt) return []
+    const rewardSkillIds =
+      achievementDefinitions[achievement.id]?.reward?.skillIds ?? []
+    return rewardSkillIds.filter((skillId) =>
+      classDefinition.unlockableSkillIds.includes(skillId),
+    )
+  })
+}
+
+function withAchievementRewards(
+  character: PersistentCharacter,
+  save: GameSave,
+) {
+  const rewardSkillIds = getClassRewardSkillIds(save, character.classId)
+  const unlockedSkillIds = Array.from(
+    new Set([...character.unlockedSkillIds, ...rewardSkillIds]),
+  )
+  return { ...character, unlockedSkillIds }
+}
+
+function applyAchievementRewardsToCharacters(
+  characters: PersistentCharacter[],
+  achievementIds: string[],
+) {
+  return characters.map((character) => {
+    const classDefinition = classDefinitions[character.classId]
+    const rewardSkillIds = achievementIds.flatMap((achievementId) => {
+      const skillIds = achievementDefinitions[achievementId]?.reward?.skillIds ?? []
+      return skillIds.filter((skillId) =>
+        classDefinition.unlockableSkillIds.includes(skillId),
+      )
+    })
+    return {
+      ...character,
+      unlockedSkillIds: Array.from(
+        new Set([...character.unlockedSkillIds, ...rewardSkillIds]),
+      ),
+    }
+  })
+}
+
+function completeAchievements(
+  save: GameSave,
+  achievementIds: string[],
+): GameSave {
+  const unclaimedIds = achievementIds.filter(
+    (achievementId) =>
+      achievementDefinitions[achievementId] &&
+      !save.achievements.some((achievement) => achievement.id === achievementId),
+  )
+  if (unclaimedIds.length === 0) return save
+
+  const now = new Date().toISOString()
+  return {
+    ...save,
+    achievements: [
+      ...save.achievements,
+      ...unclaimedIds.map((id) => ({ id, completedAt: now })),
+    ],
+  }
+}
+
+function claimAchievementReward(save: GameSave, achievementId: string): GameSave {
+  const achievement = save.achievements.find(
+    (candidate) => candidate.id === achievementId,
+  )
+  if (!achievement || achievement.claimedAt) return save
+
+  const now = new Date().toISOString()
+  const characters = applyAchievementRewardsToCharacters(save.characters, [
+    achievementId,
+  ])
+
+  return syncActiveCharacter(
+    {
+      ...save,
+      achievements: save.achievements.map((candidate) =>
+        candidate.id === achievementId
+          ? { ...candidate, claimedAt: now }
+          : candidate,
+      ),
+    },
+    characters,
+  )
 }
 
 function makeCheckpoint(run: Omit<CampaignRun, 'checkpoint'>) {
@@ -198,14 +289,15 @@ export function GameProvider({
       unspentStatPoints: 0,
       createdAt: new Date().toISOString(),
     }
+    const rewardedCharacter = withAchievementRewards(character, save)
     commit(
       syncActiveCharacter(
         save,
-        [...save.characters, character],
-        save.activeCharacterId ?? character.id,
+        [...save.characters, rewardedCharacter],
+        save.activeCharacterId ?? rewardedCharacter.id,
       ),
     )
-    return character
+    return rewardedCharacter
   }
 
   function setActiveCharacter(characterId: string) {
@@ -259,6 +351,9 @@ export function GameProvider({
       portrait: character.portrait,
       background: character.background,
       trait: character.trait,
+      classId: character.classId,
+      armorType: character.armorType,
+      secondaryClassId: character.secondaryClassId,
       stats: character.stats,
       level: character.level,
       ...derived,
@@ -471,9 +566,14 @@ export function GameProvider({
         : run.claimedRewardIds,
       updatedAt: new Date().toISOString(),
     }
+    const baseSave = syncActiveCharacter(save, characters)
+    const achievementSave =
+      combat.status === 'victory' && run.flags.includes('ashfang-weakness')
+        ? completeAchievements(baseSave, ['smoke-hunter'])
+        : baseSave
     commit({
-      ...syncActiveCharacter(save, characters),
-      activeRuns: save.activeRuns.map((candidate) =>
+      ...achievementSave,
+      activeRuns: achievementSave.activeRuns.map((candidate) =>
         candidate.id === runId ? updated : candidate,
       ),
     })
@@ -548,9 +648,13 @@ export function GameProvider({
       ...withoutCheckpoint,
       checkpoint: makeCheckpoint(withoutCheckpoint),
     }
+    const achievementSave = completeAchievements(
+      syncActiveCharacter(save, characters),
+      ['wayfarer-shrine'],
+    )
     commit({
-      ...syncActiveCharacter(save, characters),
-      activeRuns: save.activeRuns.map((candidate) =>
+      ...achievementSave,
+      activeRuns: achievementSave.activeRuns.map((candidate) =>
         candidate.id === runId ? updated : candidate,
       ),
     })
@@ -565,12 +669,18 @@ export function GameProvider({
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
+    const achievementIds = [
+      'old-road-complete',
+      ...(run.flags.includes('cache-found') ? ['cache-finder'] : []),
+      ...(run.flags.includes('bloodied-escape') ? ['bloodied-road'] : []),
+    ]
+    const achievementSave = completeAchievements(save, achievementIds)
     commit({
-      ...save,
-      activeRuns: save.activeRuns.filter(
+      ...achievementSave,
+      activeRuns: achievementSave.activeRuns.filter(
         (candidate) => candidate.id !== runId,
       ),
-      completedRuns: [...save.completedRuns, completed],
+      completedRuns: [...achievementSave.completedRuns, completed],
     })
   }
 
@@ -581,6 +691,10 @@ export function GameProvider({
         (candidate) => candidate.id !== runId,
       ),
     })
+  }
+
+  function claimAchievement(achievementId: string) {
+    commit(claimAchievementReward(save, achievementId))
   }
 
   function resetAll() {
@@ -598,6 +712,7 @@ export function GameProvider({
     createCampaign,
     getRun,
     abandonCampaign,
+    claimAchievement,
     resolveSceneAction,
     travelTo,
     resolveBattle,

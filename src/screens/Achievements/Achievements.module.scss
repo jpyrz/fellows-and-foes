@@ -1,0 +1,14 @@
+.achievements { display:grid; gap:1.25rem; max-width:68rem; margin:0 auto; }
+.hero { padding:clamp(1.2rem,5vw,2.4rem); border:1px solid var(--ff-border); background:radial-gradient(circle at 82% 10%,color-mix(in srgb,var(--ff-accent) 16%,transparent),transparent 18rem),var(--ff-bg-panel); }
+.hero span { color:var(--ff-accent); font-size:.68rem; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+.hero h1 { max-width:42rem; margin:.3rem 0; font-family:Georgia,serif; font-size:clamp(2.4rem,8vw,4.8rem); line-height:.95; }
+.hero p { max-width:42rem; color:var(--ff-text-muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr)); gap:.85rem; }
+.card { display:grid; align-content:start; gap:.55rem; min-height:15rem; padding:1rem; border:1px solid var(--ff-border); background:var(--ff-bg-panel); opacity:.72; }
+.card[data-unlocked] { border-color:var(--ff-accent); opacity:1; box-shadow:0 0 1.4rem color-mix(in srgb,var(--ff-accent) 10%,transparent); }
+.card > div { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.card > div span { color:var(--ff-text-muted); font-size:.62rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+.card h2 { margin:0; font-family:Georgia,serif; font-size:1.65rem; }
+.card p { margin:0; color:var(--ff-text); }
+.card small { color:var(--ff-text-muted); line-height:1.35; }
+.card strong { margin-top:auto; color:var(--ff-accent); font-size:.8rem; }

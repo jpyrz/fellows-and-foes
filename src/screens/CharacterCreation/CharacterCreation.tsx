@@ -8,15 +8,15 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
+import { SpellPreview } from '../../components/SpellPreview/SpellPreview'
+import { characterClassIds, classDefinitions } from '../../game/campaign/classes'
 import { useGame } from '../../game/campaign/gameContext'
 import { portraitOptions } from '../../game/campaign/content'
-import {
-  campaignSkills,
-  starterSkillIds,
-} from '../../game/campaign/skills'
+import { campaignSkills } from '../../game/campaign/skills'
 import { deriveCombatStats, statLabels } from '../../game/campaign/rules'
 import type {
   Background,
+  CharacterClassId,
   CharacterStats,
   PersonalityTrait,
   StatName,
@@ -45,6 +45,7 @@ export function CharacterCreation() {
   const [name, setName] = useState('')
   const [portrait, setPortrait] = useState(portraitOptions[0])
   const [biography, setBiography] = useState('')
+  const [classId, setClassId] = useState<CharacterClassId>('vanguard')
   const [background, setBackground] = useState<Background>('wayfarer')
   const [trait, setTrait] = useState<PersonalityTrait>('curious')
   const [stats, setStats] = useState<CharacterStats>({
@@ -54,11 +55,14 @@ export function CharacterCreation() {
     spirit: 1,
   })
   const [skillIds, setSkillIds] = useState<string[]>([])
+  const [previewSkillId, setPreviewSkillId] = useState<string | null>(null)
 
   const statsValid =
     Object.values(stats)
       .toSorted()
       .join(',') === '1,1,2,3'
+  const classDefinition = classDefinitions[classId]
+  const starterSkillIds = classDefinition.starterSkillIds
   const eligibleSkills = starterSkillIds.filter((id) => {
     const skill = campaignSkills[id]
     return stats[skill.scalingStat] >= skill.requiredStat
@@ -73,7 +77,14 @@ export function CharacterCreation() {
     setSkillIds([])
   }
 
+  function chooseClass(value: CharacterClassId) {
+    setClassId(value)
+    setSkillIds([])
+  }
+
   function toggleSkill(skillId: string) {
+    const skill = campaignSkills[skillId]
+    if (stats[skill.scalingStat] < skill.requiredStat) return
     setSkillIds((current) =>
       current.includes(skillId)
         ? current.filter((id) => id !== skillId)
@@ -90,6 +101,9 @@ export function CharacterCreation() {
       biography: biography.trim(),
       background,
       trait,
+      classId,
+      armorType: classDefinition.armorType,
+      secondaryClassId: 'none',
       stats,
       unlockedSkillIds: skillIds,
     })
@@ -171,12 +185,36 @@ export function CharacterCreation() {
           {step === 1 && (
             <>
               <div className={styles.heading}>
-                <span>Origin and instinct</span>
+                <span>Class, origin, and instinct</span>
                 <h1>What shaped them?</h1>
                 <p>
-                  These tags grant a +2 bonus or unlock special choices when
-                  they fit an authored situation.
+                  Class sets armor and starter spell pools. Background and
+                  trait still grant a +2 bonus when they fit authored checks.
                 </p>
+              </div>
+              <div>
+                <strong className={styles.choiceLabel}>Class</strong>
+                <div className={styles.classGrid}>
+                  {characterClassIds.map((option) => {
+                    const definition = classDefinitions[option]
+                    return (
+                      <button
+                        key={option}
+                        onClick={() => chooseClass(option)}
+                        data-selected={classId === option || undefined}
+                      >
+                        <strong>{definition.name}</strong>
+                        <span>{definition.role}</span>
+                        <small>
+                          {definition.armorType} armor ·{' '}
+                          {definition.primaryStats
+                            .map((stat) => statLabels[stat])
+                            .join(' / ')}
+                        </small>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
               <ChoiceGrid
                 label="Background"
@@ -245,7 +283,10 @@ export function CharacterCreation() {
               <div className={styles.heading}>
                 <span>First techniques</span>
                 <h1>Choose three skills.</h1>
-                <p>Your stats determine which classless skills you can wield.</p>
+                <p>
+                  Your {classDefinition.name} pool determines your starting
+                  options. Achievements will unlock rarer class spells later.
+                </p>
               </div>
               <div className={styles.skillGrid}>
                 {starterSkillIds.map((skillId) => {
@@ -255,9 +296,9 @@ export function CharacterCreation() {
                   return (
                     <button
                       key={skillId}
-                      disabled={!eligible}
+                      data-disabled={!eligible || undefined}
                       data-selected={selected || undefined}
-                      onClick={() => toggleSkill(skillId)}
+                      onClick={() => setPreviewSkillId(skillId)}
                       data-cy={`starter-skill-${skillId}`}
                     >
                       <img src={skill.icon} alt="" />
@@ -284,7 +325,10 @@ export function CharacterCreation() {
                 <span>Ready for the road</span>
                 <h1>{name}</h1>
                 <p className={styles.capitalize}>
-                  {background} · {trait}
+                  {classDefinition.name} · {background} · {trait}
+                </p>
+                <p>
+                  {classDefinition.armorType} armor · Secondary path: none
                 </p>
                 <p>{biography || 'No biography written yet.'}</p>
               </div>
@@ -331,9 +375,62 @@ export function CharacterCreation() {
             )}
           </footer>
         </section>
+        {previewSkillId && (
+          <SpellPreview
+            contextLabel={`${classDefinition.name} starter pool`}
+            isSelected={skillIds.includes(previewSkillId)}
+            selectionHint={getStarterSkillPreviewHint({
+              className: classDefinition.name,
+              isEligible: eligibleSkills.includes(previewSkillId),
+              isSelected: skillIds.includes(previewSkillId),
+              selectedCount: skillIds.length,
+              skillId: previewSkillId,
+              stats,
+            })}
+            skill={campaignSkills[previewSkillId]}
+            toggleDisabled={
+              !skillIds.includes(previewSkillId) &&
+              (!eligibleSkills.includes(previewSkillId) || skillIds.length >= 3)
+            }
+            disabledActionLabel={
+              eligibleSkills.includes(previewSkillId)
+                ? '3 skills selected'
+                : 'Stat requirement not met'
+            }
+            onClose={() => setPreviewSkillId(null)}
+            onToggle={() => {
+              toggleSkill(previewSkillId)
+              setPreviewSkillId(null)
+            }}
+          />
+        )}
       </div>
     </GameShell>
   )
+}
+
+function getStarterSkillPreviewHint({
+  className,
+  isEligible,
+  isSelected,
+  selectedCount,
+  skillId,
+  stats,
+}: {
+  className: string
+  isEligible: boolean
+  isSelected: boolean
+  selectedCount: number
+  skillId: string
+  stats: CharacterStats
+}) {
+  const skill = campaignSkills[skillId]
+  if (isSelected) return 'Currently chosen as one of your starting skills.'
+  if (!isEligible) {
+    return `${className}s need ${statLabels[skill.scalingStat]} ${skill.requiredStat} to choose this. Current ${statLabels[skill.scalingStat]}: ${stats[skill.scalingStat]}.`
+  }
+  if (selectedCount >= 3) return 'Remove a selected skill before choosing this one.'
+  return `Choose this as one of your ${className} starting skills.`
 }
 
 function ChoiceGrid({

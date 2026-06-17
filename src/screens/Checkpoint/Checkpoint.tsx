@@ -2,11 +2,10 @@ import { Button, Select } from '@mantine/core'
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
+import { classDefinitions } from '../../game/campaign/classes'
 import { useGame } from '../../game/campaign/gameContext'
-import {
-  campaignSkills,
-  checkpointSkillChoices,
-} from '../../game/campaign/skills'
+import { campaignSkills } from '../../game/campaign/skills'
+import type { PartyMemberSnapshot } from '../../game/campaign/types'
 import { itemDefinitions } from '../../game/combat/items'
 import styles from './Checkpoint.module.scss'
 
@@ -29,7 +28,11 @@ export function Checkpoint() {
   const activeRun = run
 
   const ready =
-    activeRun.party.every((member) => skillsByMemberId[member.id]) &&
+    activeRun.party.every(
+      (member) =>
+        getCheckpointSkillChoices(member).length === 0 ||
+        skillsByMemberId[member.id],
+    ) &&
     Boolean(itemRecipientId)
 
   function claim() {
@@ -39,6 +42,13 @@ export function Checkpoint() {
       itemRecipientId,
     })
     navigate(`/campaign/${activeRun.id}/ending`)
+  }
+
+  function getCheckpointSkillChoices(member: PartyMemberSnapshot) {
+    const classDefinition = classDefinitions[member.classId ?? 'vanguard']
+    return classDefinition.unlockableSkillIds.filter(
+      (skillId) => !member.unlockedSkillIds.includes(skillId),
+    )
   }
 
   return (
@@ -54,48 +64,69 @@ export function Checkpoint() {
         </header>
 
         <section className={styles.rewards}>
-          {activeRun.party.map((member) => (
-            <article key={member.id}>
-              <div className={styles.member}>
-                <img src={member.portrait} alt="" />
-                <span>
-                  <strong>{member.name}</strong>
-                  <small>
-                    {member.owner === 'player'
-                      ? 'Permanent unlock'
-                      : 'This campaign only'}
-                  </small>
-                </span>
-              </div>
-              <div className={styles.skills}>
-                {checkpointSkillChoices.map((skillId) => {
-                  const skill = campaignSkills[skillId]
-                  return (
-                    <button
-                      key={skillId}
-                      data-cy={`checkpoint-skill-${member.id}-${skillId}`}
-                      data-selected={
-                        skillsByMemberId[member.id] === skillId || undefined
-                      }
-                      onClick={() =>
-                        setSkillsByMemberId((current) => ({
-                          ...current,
-                          [member.id]: skillId,
-                        }))
-                      }
+          {activeRun.party.map((member) => {
+            const skillChoices = getCheckpointSkillChoices(member)
+            return (
+              <article key={member.id}>
+                <div className={styles.member}>
+                  <img src={member.portrait} alt="" />
+                  <span>
+                    <strong>{member.name}</strong>
+                    <em>
+                      {classDefinitions[member.classId ?? 'vanguard'].name} ·{' '}
+                      {member.armorType ?? 'medium'} armor
+                    </em>
+                    <small>
+                      {member.owner === 'player'
+                        ? 'Permanent unlock'
+                        : 'This campaign only'}
+                    </small>
+                  </span>
+                </div>
+                <div className={styles.skills}>
+                  {skillChoices.length === 0 ? (
+                    <div
+                      className={styles.noSkills}
+                      data-cy={`checkpoint-no-skills-${member.id}`}
                     >
-                      <img src={skill.icon} alt="" />
+                      <strong>No new spells available</strong>
                       <span>
-                        <strong>{skill.name}</strong>
-                        <small>{skill.description}</small>
-                        <em>Tier {skill.tier} · Cost {skill.cost}</em>
+                        {member.name} already knows every shrine technique for
+                        this class.
                       </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </article>
-          ))}
+                    </div>
+                  ) : (
+                    skillChoices.map((skillId) => {
+                      const skill = campaignSkills[skillId]
+                      return (
+                        <button
+                          key={skillId}
+                          data-cy={`checkpoint-skill-${member.id}-${skillId}`}
+                          data-selected={
+                            skillsByMemberId[member.id] === skillId ||
+                            undefined
+                          }
+                          onClick={() =>
+                            setSkillsByMemberId((current) => ({
+                              ...current,
+                              [member.id]: skillId,
+                            }))
+                          }
+                        >
+                          <img src={skill.icon} alt="" />
+                          <span>
+                            <strong>{skill.name}</strong>
+                            <small>{skill.description}</small>
+                            <em>Tier {skill.tier} · Cost {skill.cost}</em>
+                          </span>
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              </article>
+            )
+          })}
         </section>
 
         <section className={styles.supply}>

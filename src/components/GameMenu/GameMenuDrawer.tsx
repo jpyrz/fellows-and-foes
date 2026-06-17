@@ -79,6 +79,12 @@ function RoutedGameMenuDrawer({ campaignTitle }: GameMenuDrawerProps) {
               label="Company ledger"
               onClick={() => go('/')}
             />
+            <MenuItem
+              active={location.pathname === '/achievements'}
+              eyebrow="Boasts and unlocks"
+              label="Achievement log"
+              onClick={() => go('/achievements')}
+            />
             {run && (
               <>
                 <MenuItem

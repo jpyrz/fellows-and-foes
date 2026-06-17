@@ -7,7 +7,8 @@
 .rewards article { display:grid; grid-template-columns:11rem 1fr; gap:1rem; padding:1rem; border:1px solid var(--ff-border); background:var(--ff-bg-panel); }
 .member { display:grid; justify-items:center; align-content:center; gap:.5rem; text-align:center; }
 .member img { width:6rem; height:6.5rem; object-fit:cover; border:2px solid var(--ff-border-strong); background:var(--ff-portrait-paper); }
-.member strong,.member small { display:block; }
+.member strong,.member small,.member em { display:block; }
+.member em { color:var(--ff-accent); font-size:.62rem; font-style:normal; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
 .member small { color:var(--ff-text-muted); }
 .skills { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; }
 .skills button { display:grid; align-content:start; gap:.6rem; padding:.75rem; border:1px solid var(--ff-border); color:inherit; background:var(--ff-surface); text-align:left; }
@@ -16,6 +17,9 @@
 .skills strong,.skills small,.skills em { display:block; }
 .skills small { margin-top:.3rem; color:var(--ff-text-muted); font-size:.72rem; }
 .skills em { margin-top:.5rem; color:var(--ff-accent); font-size:.62rem; font-style:normal; text-transform:uppercase; }
+.noSkills { grid-column:1/-1; display:grid; align-content:center; min-height:8rem; padding:1rem; border:1px dashed color-mix(in srgb,var(--ff-accent) 34%,var(--ff-border)); background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); text-align:center; }
+.noSkills strong { color:var(--ff-accent); font-size:.72rem; font-weight:950; letter-spacing:.14em; text-transform:uppercase; }
+.noSkills span { margin:.4rem auto 0; max-width:24rem; color:var(--ff-text-muted); font-size:.82rem; line-height:1.45; }
 .supply { display:grid; grid-template-columns:1fr minmax(12rem,16rem) minmax(12rem,16rem); align-items:end; gap:1rem; padding:1rem; border:1px solid var(--ff-border); background:var(--ff-bg-panel); }
 .supply h2 { margin:.2rem 0; font-family:Georgia,serif; }
 .checkpoint footer { display:flex; align-items:center; justify-content:space-between; gap:1rem; }

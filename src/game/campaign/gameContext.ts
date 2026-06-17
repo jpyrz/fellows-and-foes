@@ -39,6 +39,7 @@ export interface GameContextValue {
   createCampaign(party: CampaignPartySelection[]): CampaignRun
   getRun(runId: string): CampaignRun | undefined
   abandonCampaign(runId: string): void
+  claimAchievement(achievementId: string): void
   resolveSceneAction(
     runId: string,
     action: SceneActionDefinition,

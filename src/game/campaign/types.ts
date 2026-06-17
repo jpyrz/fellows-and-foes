@@ -7,6 +7,14 @@ export type PersonalityTrait =
   | 'cautious'
   | 'compassionate'
   | 'curious'
+export type CharacterClassId = 'vanguard' | 'wayfinder' | 'arcanist' | 'mender'
+export type ArmorType = 'light' | 'medium' | 'heavy' | 'robe'
+export type SecondaryClassId =
+  | 'ash-touched'
+  | 'vampire'
+  | 'werewolf'
+  | 'feybound'
+  | 'none'
 
 export interface CharacterStats {
   might: number
@@ -22,6 +30,9 @@ export interface PersistentCharacter {
   biography: string
   background: Background
   trait: PersonalityTrait
+  classId: CharacterClassId
+  armorType: ArmorType
+  secondaryClassId: SecondaryClassId
   stats: CharacterStats
   level: number
   xp: number
@@ -41,6 +52,9 @@ export interface PartyMemberSnapshot {
   portrait: string
   background: Background
   trait: PersonalityTrait
+  classId?: CharacterClassId
+  armorType?: ArmorType
+  secondaryClassId?: SecondaryClassId
   stats: CharacterStats
   level: number
   maxHealth: number
@@ -198,6 +212,7 @@ export interface GameSave {
   character: PersistentCharacter | null
   characters: PersistentCharacter[]
   activeCharacterId: string | null
+  achievements: ClaimedAchievement[]
   activeRuns: CampaignRun[]
   completedRuns: CampaignRun[]
 }
@@ -212,4 +227,38 @@ export interface ExplorationRoll {
   total: number
   dc: number
   success: boolean
+}
+
+export type AchievementCategory =
+  | 'campaign'
+  | 'combat'
+  | 'exploration'
+  | 'class'
+  | 'party'
+  | 'challenge'
+  | 'legacy'
+
+export type AchievementDifficulty = 'easy' | 'medium' | 'hard' | 'legendary'
+
+export interface AchievementReward {
+  skillIds?: string[]
+  secondaryClassIds?: SecondaryClassId[]
+  title?: string
+}
+
+export interface AchievementDefinition {
+  id: string
+  name: string
+  description: string
+  category: AchievementCategory
+  difficulty: AchievementDifficulty
+  requirement: string
+  rewardText: string
+  reward?: AchievementReward
+}
+
+export interface ClaimedAchievement {
+  id: string
+  completedAt: string
+  claimedAt?: string
 }

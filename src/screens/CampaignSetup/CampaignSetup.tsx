@@ -2,6 +2,8 @@ import { Badge, Button } from '@mantine/core'
 import { useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
+import { SpellPreview } from '../../components/SpellPreview/SpellPreview'
+import { classDefinitions } from '../../game/campaign/classes'
 import { useGame } from '../../game/campaign/gameContext'
 import {
   companionDefinitions,
@@ -30,9 +32,9 @@ export function CampaignSetup() {
         id: character.id,
         source: 'character' as const,
         name: character.name,
-        title: `Level ${character.level} fellow`,
+        title: `Level ${character.level} ${classDefinitions[character.classId].name}`,
         portrait: character.portrait,
-        subtitle: `${character.unlockedSkillIds.length} unlocked spells`,
+        subtitle: `${character.armorType} armor · ${character.unlockedSkillIds.length} spells`,
         skillIds: character.unlockedSkillIds,
       })),
       ...companionDefinitions.map((companion) => ({
@@ -59,6 +61,10 @@ export function CampaignSetup() {
       ? { [initialActiveCandidate.id]: initialActiveCandidate.skillIds.slice(0, 3) }
       : {},
   )
+  const [preview, setPreview] = useState<{
+    memberId: string
+    skillId: string
+  } | null>(null)
 
   if (save.characters.length === 0) {
     return <Navigate to="/character/create" replace />
@@ -103,6 +109,10 @@ export function CampaignSetup() {
     })
   }
 
+  function previewSkill(memberId: string, skillId: string) {
+    setPreview({ memberId, skillId })
+  }
+
   function begin() {
     const party: CampaignPartySelection[] = selectedIds.map((memberId) => {
       const candidate = candidates.find((entry) => entry.id === memberId)!
@@ -126,27 +136,32 @@ export function CampaignSetup() {
     selectedIds.every((id) => (loadouts[id] ?? []).length === 3)
 
   return (
-    <GameShell title="Form an Expedition">
+    <GameShell title="Choose a Tavern Tale">
       <div className={styles.setup}>
         <section className={styles.campaignCard}>
           <div>
             <Badge color="brand" variant="light">
               Recommended level {oldRoadCampaign.recommendedLevel}
             </Badge>
-            <span className={styles.eyebrow}>{oldRoadCampaign.subtitle}</span>
+            <span className={styles.eyebrow}>
+              Storyglass tale · {oldRoadCampaign.subtitle}
+            </span>
             <h1>{oldRoadCampaign.title}</h1>
-            <p>{oldRoadCampaign.description}</p>
+            <p>
+              An old traveler turns the storyglass toward your table.{' '}
+              {oldRoadCampaign.description}
+            </p>
           </div>
           <div className={styles.campaignSeal}>I</div>
         </section>
 
         <section>
           <div className={styles.heading}>
-            <span>Solo expedition</span>
-            <h2>Choose three party members.</h2>
+            <span>Table company</span>
+            <h2>Choose three fellows for the retelling.</h2>
             <p>
-              Custom fellows keep permanent growth. Premade fellows still work
-              as run-only allies when your roster is thin.
+              Custom fellows keep permanent growth between tales. Premade
+              fellows still work as run-only allies when your roster is thin.
             </p>
           </div>
           <div className={styles.party}>
@@ -183,7 +198,8 @@ export function CampaignSetup() {
               <h2>Select three spells each.</h2>
               <p>
                 You can rebuild loadouts at the start of every campaign from
-                each fellow’s unlocked spell pool.
+                each fellow’s unlocked spell pool. Tap a spell to inspect its
+                details before attuning it.
               </p>
             </div>
             {selectedIds.map((memberId) => {
@@ -209,7 +225,8 @@ export function CampaignSetup() {
                           data-selected={
                             selectedSkills.includes(skillId) || undefined
                           }
-                          onClick={() => toggleSkill(memberId, skillId)}
+                          aria-label={`Preview ${skill.name}`}
+                          onClick={() => previewSkill(memberId, skillId)}
                         >
                           <img src={skill.icon} alt="" />
                           <span>
@@ -243,7 +260,44 @@ export function CampaignSetup() {
             </Button>
           </div>
         </footer>
+        {preview && (
+          <SpellPreview
+            contextLabel={`${
+              candidates.find((entry) => entry.id === preview.memberId)?.name ??
+              'Fellow'
+            }'s spell pool`}
+            isSelected={
+              loadouts[preview.memberId]?.includes(preview.skillId) ?? false
+            }
+            selectionHint={getPreviewHint(
+              candidates.find((entry) => entry.id === preview.memberId)?.name,
+              loadouts[preview.memberId]?.includes(preview.skillId) ?? false,
+              loadouts[preview.memberId]?.length ?? 0,
+            )}
+            skill={campaignSkills[preview.skillId]}
+            toggleDisabled={
+              !(loadouts[preview.memberId]?.includes(preview.skillId) ?? false) &&
+              (loadouts[preview.memberId]?.length ?? 0) >= 3
+            }
+            disabledActionLabel="3 spells selected"
+            onClose={() => setPreview(null)}
+            onToggle={() => {
+              toggleSkill(preview.memberId, preview.skillId)
+              setPreview(null)
+            }}
+          />
+        )}
       </div>
     </GameShell>
   )
+}
+
+function getPreviewHint(
+  name: string | undefined,
+  isSelected: boolean,
+  selectedCount: number,
+) {
+  if (isSelected) return 'Currently attuned for this campaign.'
+  if (selectedCount >= 3) return 'Remove a selected spell before attuning this one.'
+  return `Attune this spell for ${name ?? 'this fellow'}'s campaign loadout.`
 }

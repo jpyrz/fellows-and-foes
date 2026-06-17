@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { CombatPrototype } from './components/CombatPrototype/CombatPrototype'
+import { Achievements } from './screens/Achievements/Achievements'
 import { CampaignBattle } from './screens/CampaignBattle/CampaignBattle'
 import { CampaignMap } from './screens/CampaignMap/CampaignMap'
 import { CampaignSetup } from './screens/CampaignSetup/CampaignSetup'
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/character/create" element={<CharacterCreation />} />
         <Route path="/characters/:characterId" element={<CharacterDetail />} />
+        <Route path="/achievements" element={<Achievements />} />
         <Route path="/campaign/new" element={<CampaignSetup />} />
         <Route path="/campaign/:runId" element={<StoryScreen />} />
         <Route path="/campaign/:runId/map" element={<CampaignMap />} />

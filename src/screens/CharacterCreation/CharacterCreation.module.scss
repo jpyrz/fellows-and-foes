@@ -13,6 +13,12 @@
 .choiceGrid button { display:grid; gap:.25rem; min-height:6rem; padding:1rem; border:1px solid var(--ff-border); color:inherit; background:var(--ff-surface); text-align:left; text-transform:capitalize; }
 .choiceGrid button[data-selected] { border-color:var(--ff-accent); background:color-mix(in srgb,var(--ff-accent) 10%,var(--ff-surface)); }
 .choiceGrid span { color:var(--ff-text-muted); font-size:.8rem; text-transform:none; }
+.classGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:.65rem; }
+.classGrid button { display:grid; gap:.25rem; min-height:7rem; padding:1rem; border:1px solid var(--ff-border); color:inherit; background:linear-gradient(135deg,color-mix(in srgb,var(--ff-accent) 4%,transparent),transparent 55%),var(--ff-surface); text-align:left; }
+.classGrid button[data-selected] { border-color:var(--ff-accent); background:color-mix(in srgb,var(--ff-accent) 10%,var(--ff-surface)); box-shadow:0 0 1.1rem color-mix(in srgb,var(--ff-accent) 12%,transparent); }
+.classGrid strong { font-family:Georgia,serif; font-size:1.25rem; }
+.classGrid span { color:var(--ff-text-muted); font-size:.78rem; }
+.classGrid small { color:var(--ff-accent); font-size:.62rem; font-weight:900; text-transform:uppercase; }
 .statGrid { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; }
 .statGrid > div { padding:1rem; border:1px solid var(--ff-border); background:var(--ff-surface); }
 .statGrid small { display:block; margin-top:.6rem; color:var(--ff-text-muted); }
@@ -23,7 +29,7 @@
 .skillGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:.65rem; }
 .skillGrid button { display:flex; align-items:center; gap:.8rem; min-height:6rem; padding:.75rem; border:1px solid var(--ff-border); color:inherit; background:var(--ff-surface); text-align:left; }
 .skillGrid button[data-selected] { border-color:var(--ff-accent); background:color-mix(in srgb,var(--ff-accent) 10%,var(--ff-surface)); }
-.skillGrid button:disabled { opacity:.35; }
+.skillGrid button[data-disabled] { opacity:.45; }
 .skillGrid img { width:3.4rem; height:3.4rem; }
 .skillGrid span, .skillGrid strong, .skillGrid small, .skillGrid em { display:block; }
 .skillGrid small { color:var(--ff-text-muted); }
@@ -44,7 +50,7 @@
   .mobileStepper button { height:.6rem; border:1px solid var(--ff-border); border-radius:999px; background:var(--ff-surface); }
   .mobileStepper button[data-complete] { border-color:var(--ff-border-strong); background:color-mix(in srgb,var(--ff-accent) 35%,var(--ff-surface)); }
   .mobileStepper button[data-active] { border-color:var(--ff-accent); background:var(--ff-accent); box-shadow:0 0 .8rem color-mix(in srgb,var(--ff-accent) 45%,transparent); }
-  .choiceGrid,.skillGrid { grid-template-columns:1fr; }
+  .choiceGrid,.classGrid,.skillGrid { grid-template-columns:1fr; }
   .statGrid { grid-template-columns:repeat(2,1fr); }
   .review { grid-template-columns:6rem 1fr; }
   .review > img { width:6rem; height:7rem; }

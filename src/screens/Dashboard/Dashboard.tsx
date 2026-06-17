@@ -1,6 +1,13 @@
 import { Badge, Button, Progress } from '@mantine/core'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AchievementRewardReveal } from '../../components/AchievementRewardReveal/AchievementRewardReveal'
 import { GameShell } from '../../components/GameShell/GameShell'
+import {
+  achievementDefinitions,
+  achievementIds,
+} from '../../game/campaign/achievements'
+import { classDefinitions } from '../../game/campaign/classes'
 import { useGame } from '../../game/campaign/gameContext'
 import { getCampaignDefinition } from '../../game/campaign/content'
 import {
@@ -11,7 +18,10 @@ import type { StatName } from '../../game/campaign/types'
 import styles from './Dashboard.module.scss'
 
 export function Dashboard() {
-  const { allocateStat, save, setActiveCharacter } = useGame()
+  const { allocateStat, claimAchievement, save, setActiveCharacter } = useGame()
+  const [revealedAchievementId, setRevealedAchievementId] = useState<
+    string | null
+  >(null)
   const navigate = useNavigate()
   const character = save.character
 
@@ -19,11 +29,11 @@ export function Dashboard() {
     return (
       <GameShell title="A Company Unwritten">
         <section className={styles.emptyHero}>
-          <span className={styles.kicker}>Begin your chronicle</span>
-          <h1>Every road needs its first fellow.</h1>
+          <span className={styles.kicker}>The tavern is listening</span>
+          <h1>Every tale needs its first fellow.</h1>
           <p>
-            Create a persistent hero, choose the skills that define them, and
-            carry their history from campaign to campaign.
+            Create a persistent hero, choose a class, and step into living
+            tavern tales told through a strange little storyglass.
           </p>
           <Button
             color="brand"
@@ -47,6 +57,18 @@ export function Dashboard() {
       : ((character.xp - previousThreshold) /
           (nextThreshold - previousThreshold)) *
         100
+  const classDefinition = classDefinitions[character.classId]
+  const readyAchievements = save.achievements.filter(
+    (achievement) => !achievement.claimedAt,
+  )
+  const revealedAchievement = revealedAchievementId
+    ? achievementDefinitions[revealedAchievementId]
+    : null
+
+  function claimReadyAchievement(achievementId: string) {
+    claimAchievement(achievementId)
+    setRevealedAchievementId(achievementId)
+  }
 
   return (
     <GameShell title="Company Ledger">
@@ -57,8 +79,8 @@ export function Dashboard() {
             <span>Your persistent fellow</span>
             <h1>{character.name}</h1>
             <p>
-              Level {character.level} · {character.background} ·{' '}
-              {character.trait}
+              Level {character.level} · {classDefinition.name} ·{' '}
+              {character.armorType} armor
             </p>
             <Progress value={progress} color="brand" size="sm" />
             <small>
@@ -85,6 +107,61 @@ export function Dashboard() {
             <div className={styles.levelNotice}>
               {character.unspentStatPoints} stat point
               {character.unspentStatPoints === 1 ? '' : 's'} ready to spend
+            </div>
+          )}
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeading}>
+            <div>
+              <span>Completed achievements</span>
+              <h2>Ready to claim</h2>
+            </div>
+            <Button
+              color="brand"
+              variant="light"
+              onClick={() => navigate('/achievements')}
+            >
+              View log
+            </Button>
+          </div>
+          {readyAchievements.length === 0 ? (
+            <div className={styles.emptyRun}>
+              <strong>
+                {
+                  save.achievements.filter((achievement) => achievement.claimedAt)
+                    .length
+                }
+                /{achievementIds.length} rewards claimed
+              </strong>
+              <span>
+                Completed achievements with unclaimed rewards will appear here.
+              </span>
+            </div>
+          ) : (
+            <div className={styles.claimList}>
+              {readyAchievements.slice(0, 3).map((achievement) => {
+                const definition = achievementDefinitions[achievement.id]
+                return (
+                  <article key={achievement.id}>
+                    <span>{definition.category}</span>
+                    <strong>{definition.name}</strong>
+                    <small>{definition.rewardText}</small>
+                    <Button
+                      color="brand"
+                      size="compact-sm"
+                      onClick={() => claimReadyAchievement(achievement.id)}
+                    >
+                      Claim rewards
+                    </Button>
+                  </article>
+                )
+              })}
+              {readyAchievements.length > 3 && (
+                <Button variant="subtle" onClick={() => navigate('/achievements')}>
+                  View all ready rewards
+                </Button>
+              )}
             </div>
           )}
         </section>
@@ -124,7 +201,8 @@ export function Dashboard() {
                       spells
                     </small>
                     <em>
-                      {fellow.background} · {fellow.trait}
+                      {classDefinitions[fellow.classId].name} ·{' '}
+                      {fellow.background}
                     </em>
                   </span>
                 </button>
@@ -148,8 +226,8 @@ export function Dashboard() {
         <section className={styles.section}>
           <div className={styles.sectionHeading}>
             <div>
-              <span>Continue the journey</span>
-              <h2>Active adventures</h2>
+              <span>Living tales</span>
+              <h2>Active tavern tales</h2>
             </div>
             <Button
               color="brand"
@@ -165,8 +243,8 @@ export function Dashboard() {
           <div className={styles.runGrid}>
             {save.activeRuns.length === 0 && (
               <div className={styles.emptyRun}>
-                <strong>The road is waiting.</strong>
-                <span>Begin The Old Road when your party is ready.</span>
+                <strong>The storyglass is quiet.</strong>
+                <span>Begin The Old Road when your company is ready.</span>
               </div>
             )}
             {save.activeRuns.map((run) => {
@@ -209,6 +287,12 @@ export function Dashboard() {
           </section>
         )}
       </div>
+      {revealedAchievement && (
+        <AchievementRewardReveal
+          achievement={revealedAchievement}
+          onContinue={() => setRevealedAchievementId(null)}
+        />
+      )}
     </GameShell>
   )
 }

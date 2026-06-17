@@ -34,6 +34,14 @@ function selectSkillAndTarget(skillId: string, targetId: string) {
   cy.get(`[data-cy="target-${targetId}"]`).click()
 }
 
+function selectStarterSkill(skillId: string) {
+  cy.get(`[data-cy="starter-skill-${skillId}"]`).click()
+  cy.get('[role="dialog"]')
+    .should('be.visible')
+    .and('contain.text', 'starter pool')
+  cy.contains('[role="dialog"] button', 'Select spell').click()
+}
+
 describe('<CombatPrototype />', () => {
   beforeEach(() => {
     cy.viewport(430, 900)
@@ -426,9 +434,9 @@ describe('campaign alpha flow', () => {
     cy.get('[data-cy="creation-next"]').click()
     cy.get('[data-cy="creation-next"]').click()
     cy.get('[data-cy="creation-next"]').click()
-    cy.get('[data-cy="starter-skill-iron-strike"]').click()
-    cy.get('[data-cy="starter-skill-shield-bash"]').click()
-    cy.get('[data-cy="starter-skill-quick-shot"]').click()
+    selectStarterSkill('iron-strike')
+    selectStarterSkill('shield-bash')
+    selectStarterSkill('quick-shot')
     cy.get('[data-cy="creation-next"]').click()
     cy.get('[data-cy="finish-character"]').click()
 
@@ -468,6 +476,18 @@ describe('campaign alpha flow', () => {
       const run = stored.activeRuns[0]
       campaignRunId = run.id
       playerId = run.characterId
+      const playerSnapshot = run.party.find(
+        (member: { id: string }) => member.id === playerId,
+      )
+      playerSnapshot.unlockedSkillIds = [
+        ...new Set([
+          ...playerSnapshot.unlockedSkillIds,
+          'cleaving-blow',
+          'guardian-oath',
+        ]),
+      ]
+      stored.character.unlockedSkillIds = playerSnapshot.unlockedSkillIds
+      stored.characters[0].unlockedSkillIds = playerSnapshot.unlockedSkillIds
       run.sceneId = 'after-battle'
       delete run.currentEncounterId
       run.claimedRewardIds.push('boss-smoke-in-the-mire')
@@ -486,17 +506,26 @@ describe('campaign alpha flow', () => {
     cy.url().should('include', '/checkpoint')
 
     cy.then(() => {
-      cy.get(
-        `[data-cy="checkpoint-skill-${playerId}-ember-lance"]`,
-      ).click()
+      cy.get(`[data-cy="checkpoint-no-skills-${playerId}"]`).should(
+        'contain.text',
+        'No new spells available',
+      )
       cy.get('[data-cy="checkpoint-skill-brann-guardian-oath"]').click()
-      cy.get('[data-cy="checkpoint-skill-elowen-venom-cut"]').click()
+      cy.get('[data-cy="checkpoint-skill-elowen-ember-lance"]').click()
     })
     cy.get('[data-cy="claim-checkpoint"]').click()
 
     cy.contains('h1', 'A Road Reopened').should('be.visible')
     cy.contains('Mara · Level 2 · 100 XP').should('be.visible')
     cy.get('[data-cy="complete-campaign"]').click()
+
+    cy.contains('h2', 'Ready to claim').should('be.visible')
+    cy.contains('First Tale Told').should('be.visible')
+    cy.contains('article', 'First Tale Told')
+      .contains('button', 'Claim rewards')
+      .click()
+    cy.contains('Achievement completed').should('be.visible')
+    cy.contains('button', 'Continue').click()
 
     cy.contains('h2', 'Completed chronicles').should('be.visible')
     cy.contains('First Contact completed').should('be.visible')
@@ -506,8 +535,14 @@ describe('campaign alpha flow', () => {
       )
       expect(stored.activeRuns).to.have.length(0)
       expect(stored.completedRuns[0].id).to.equal(campaignRunId)
-      expect(stored.character.unlockedSkillIds).to.include('ember-lance')
-      expect(stored.characters[0].unlockedSkillIds).to.include('ember-lance')
+      expect(stored.character.unlockedSkillIds).to.include('cleaving-blow')
+      expect(stored.characters[0].unlockedSkillIds).to.include('cleaving-blow')
+      expect(
+        stored.achievements.find(
+          (achievement: { id: string }) =>
+            achievement.id === 'old-road-complete',
+        ).claimedAt,
+      ).to.be.a('string')
     })
   })
 })

@@ -1,6 +1,7 @@
 import { Button, Progress } from '@mantine/core'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
+import { classDefinitions } from '../../game/campaign/classes'
 import { useGame } from '../../game/campaign/gameContext'
 import { deriveCombatStats, levelThresholds, statLabels } from '../../game/campaign/rules'
 import { campaignSkills } from '../../game/campaign/skills'
@@ -17,6 +18,7 @@ export function CharacterDetail() {
 
   if (!character) return <Navigate to="/" replace />
 
+  const classDefinition = classDefinitions[character.classId]
   const derived = deriveCombatStats(character.stats)
   const nextThreshold =
     levelThresholds[character.level] ?? levelThresholds.at(-1)!
@@ -37,8 +39,8 @@ export function CharacterDetail() {
             <span>Persistent fellow</span>
             <h1>{character.name}</h1>
             <p>
-              Level {character.level} · {character.background} ·{' '}
-              {character.trait}
+              Level {character.level} · {classDefinition.name} ·{' '}
+              {character.armorType} armor
             </p>
             <Progress value={progress} color="brand" size="sm" />
             <small>
@@ -56,6 +58,23 @@ export function CharacterDetail() {
           >
             {character.id === save.activeCharacterId ? 'Active' : 'Make active'}
           </Button>
+        </section>
+
+        <section className={styles.panel}>
+          <div className={styles.heading}>
+            <span>Main class</span>
+            <h2>{classDefinition.name}</h2>
+          </div>
+          <p className={styles.bio}>
+            {classDefinition.description} Secondary path:{' '}
+            {character.secondaryClassId === 'none'
+              ? 'none'
+              : character.secondaryClassId}
+          </p>
+          <div className={styles.derived}>
+            <span>{classDefinition.role}</span>
+            <span>{character.armorType} armor</span>
+          </div>
         </section>
 
         <section className={styles.panel}>

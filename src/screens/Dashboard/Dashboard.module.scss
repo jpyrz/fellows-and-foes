@@ -31,6 +31,12 @@
 .emptyRun, .runCard { min-height: 10rem; padding: 1.2rem; border: 1px solid var(--ff-border); color: inherit; background: var(--ff-bg-panel); text-align: left; }
 .emptyRun { display: grid; place-content: center; color: var(--ff-text-muted); }
 .emptyRun strong, .emptyRun span { display: block; }
+.claimList { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr)); gap:.75rem; }
+.claimList article { display:grid; align-content:start; gap:.35rem; padding:1rem; border:1px solid var(--ff-accent); background:linear-gradient(135deg,color-mix(in srgb,var(--ff-accent) 12%,transparent),transparent 60%),var(--ff-bg-panel); box-shadow:0 0 1.2rem color-mix(in srgb,var(--ff-accent) 10%,transparent); }
+.claimList article > span { color:var(--ff-accent); font-size:.58rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+.claimList article > strong { font-family:Georgia,serif; font-size:1.35rem; }
+.claimList article > small { color:var(--ff-text-muted); line-height:1.35; }
+.claimList article button { margin-top:.35rem; }
 .runCard { cursor: pointer; }
 .runCard:hover { border-color: var(--ff-border-strong); transform: translateY(-2px); }
 .runCard h3 { margin: .8rem 0 .2rem; font-family: Georgia,serif; font-size: 1.5rem; }
