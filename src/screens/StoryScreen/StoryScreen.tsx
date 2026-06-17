@@ -9,7 +9,9 @@ import {
   statLabels,
 } from '../../game/campaign/rules'
 import type {
+  ActionApproach,
   ExplorationRoll,
+  OutcomeMoment,
   PartyMemberSnapshot,
   SceneActionDefinition,
 } from '../../game/campaign/types'
@@ -211,6 +213,9 @@ export function StoryScreen() {
                   data-cy={`scene-action-${action.id}`}
                 >
                   <span>{action.category}</span>
+                  <i data-approach={action.approach ?? 'clever'}>
+                    {getApproachLabel(action.approach)}
+                  </i>
                   <strong>{completed ? 'Completed' : action.label}</strong>
                   <p>{action.description}</p>
                   {checkContext && (
@@ -275,32 +280,21 @@ export function StoryScreen() {
         />
       )}
 
-      <Modal
-        opened={Boolean(outcome)}
-        onClose={() => setOutcome(null)}
-        centered
-        title={outcome?.success ? 'The road changes' : 'A setback'}
-        styles={{
-          content: { background: 'var(--ff-bg-panel)' },
-          header: { background: 'var(--ff-bg-panel)' },
-        }}
-      >
-        <p>
-          {outcome?.success
-            ? outcome.action.successText
-            : outcome?.action.failureText}
-        </p>
-        <Button
-          fullWidth
-          color="brand"
-          onClick={() => {
-            if (outcome) routeAfter(outcome.action, outcome.success)
+      {outcome && (
+        <OutcomeReveal
+          moment={getOutcomeMoment(outcome) ?? undefined}
+          outcome={
+            outcome.success
+              ? outcome.action.successText
+              : outcome.action.failureText
+          }
+          success={outcome.success}
+          onContinue={() => {
+            routeAfter(outcome.action, outcome.success)
             setOutcome(null)
           }}
-        >
-          Continue
-        </Button>
-      </Modal>
+        />
+      )}
 
       <Modal
         opened={journalOpen}
@@ -369,4 +363,51 @@ function getRetryLabel(retryPolicy: SceneActionDefinition['retryPolicy']) {
   if (retryPolicy === 'after-advantage') return 'Retry after finding leverage'
   if (retryPolicy === 'changed') return 'Failure changes the path'
   return 'Story outcome'
+}
+
+function getApproachLabel(approach?: ActionApproach) {
+  if (!approach) return 'Clever'
+  return approach[0].toUpperCase() + approach.slice(1)
+}
+
+function getOutcomeMoment(
+  outcome: { action: SceneActionDefinition; success: boolean } | null,
+) {
+  if (!outcome) return null
+  return outcome.success
+    ? outcome.action.successMoment
+    : outcome.action.failureMoment
+}
+
+function OutcomeReveal({
+  moment,
+  onContinue,
+  outcome,
+  success,
+}: {
+  moment?: OutcomeMoment
+  onContinue(): void
+  outcome?: string
+  success: boolean
+}) {
+  const fallbackTitle = success ? 'The Road Changes' : 'A Setback'
+
+  return (
+    <div className={styles.outcomeOverlay} role="dialog" aria-modal="true">
+      <div
+        className={styles.outcomeReveal}
+        data-tone={moment?.tone ?? (success ? 'route' : 'setback')}
+      >
+        <span>{success ? 'Success' : 'Setback'} · {moment?.tone ?? 'story'}</span>
+        <div className={styles.outcomeStamp}>
+          {moment?.title ?? fallbackTitle}
+        </div>
+        {moment?.text && <p className={styles.outcomePrize}>{moment.text}</p>}
+        {outcome && <p className={styles.outcomeText}>{outcome}</p>}
+        <Button color={success ? 'brand' : 'red'} size="md" onClick={onContinue}>
+          Continue
+        </Button>
+      </div>
+    </div>
+  )
 }

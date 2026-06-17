@@ -83,15 +83,17 @@ export function createCampaignCombatState(run: CampaignRun): CombatState {
   const enemyTemplates = createCombatants().filter(
     (combatant) => combatant.team === 'enemies',
   )
+  const hasWeakness = run.flags.includes('ashfang-weakness')
+  const enemiesAreAlerted =
+    run.flags.includes('ashfang-alerted') || run.flags.includes('noisy-escape')
   const enemies = enemyTemplates.map((enemy) => {
     const rolled = rollInitiative(seed, Math.max(0, enemy.initiative - 10))
     seed = rolled.seed
+    const defenseModifier = hasWeakness ? -2 : enemiesAreAlerted ? 1 : 0
     return {
       ...enemy,
-      defense: run.flags.includes('ashfang-weakness')
-        ? enemy.defense - 2
-        : enemy.defense,
-      initiative: rolled.initiative,
+      defense: enemy.defense + defenseModifier,
+      initiative: rolled.initiative + (enemiesAreAlerted && !hasWeakness ? 2 : 0),
     }
   })
   const combatants = [...heroes, ...enemies]
@@ -111,8 +113,10 @@ export function createCampaignCombatState(run: CampaignRun): CombatState {
         id: 1,
         round: 1,
         tone: 'neutral',
-        message: run.flags.includes('ashfang-weakness')
+        message: hasWeakness
           ? 'The party thickens the smoke. The ashfangs emerge disoriented as the mireling advances.'
+          : enemiesAreAlerted
+            ? 'The mire is ready for you. Ashfangs circle wide, already hunting by the time steel clears leather.'
           : 'Ashfangs emerge from the smoke while something heavy moves in the mire.',
       },
     ],

@@ -59,6 +59,31 @@ export type RetryPolicy =
   | 'another-hero'
   | 'after-advantage'
 
+export type ActionApproach =
+  | 'safe'
+  | 'risky'
+  | 'clever'
+  | 'force'
+  | 'social'
+  | 'magic'
+  | 'sneaky'
+  | 'desperate'
+  | 'combat'
+
+export type OutcomeMomentTone =
+  | 'discovery'
+  | 'reward'
+  | 'setback'
+  | 'danger'
+  | 'route'
+  | 'battle'
+
+export interface OutcomeMoment {
+  title: string
+  text?: string
+  tone: OutcomeMomentTone
+}
+
 export interface CheckDefinition {
   stat: StatName
   dc: 8 | 11 | 14 | 17
@@ -82,11 +107,14 @@ export interface SceneActionDefinition {
   label: string
   description: string
   category: 'inspect' | 'talk' | 'force' | 'magic' | 'travel' | 'combat'
+  approach?: ActionApproach
   check?: CheckDefinition
   requiredFlags?: string[]
   hiddenUntilRevealed?: boolean
   repeatable?: boolean
   retryPolicy?: RetryPolicy
+  successMoment?: OutcomeMoment
+  failureMoment?: OutcomeMoment
   successText: string
   failureText?: string
   successEffects: OutcomeEffect[]

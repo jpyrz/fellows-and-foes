@@ -212,6 +212,151 @@
   line-height: 1.55;
 }
 
+.moment {
+  display: grid;
+  width: min(24rem, 100%);
+  gap: 0.18rem;
+  margin: 0 auto;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ff-border);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--moment-color) 13%, transparent),
+      transparent 58%
+    ),
+    var(--ff-bg-panel);
+  box-shadow: 0 0 1.5rem color-mix(in srgb, var(--moment-color) 16%, transparent);
+}
+
+.moment[data-tone="discovery"],
+.moment[data-tone="reward"] {
+  --moment-color: var(--ff-health);
+}
+
+.moment[data-tone="setback"],
+.moment[data-tone="danger"] {
+  --moment-color: var(--ff-danger);
+}
+
+.moment[data-tone="route"] {
+  --moment-color: var(--ff-warning);
+}
+
+.moment[data-tone="battle"] {
+  --moment-color: var(--ff-accent);
+}
+
+.moment span {
+  color: var(--moment-color);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.moment strong {
+  font-family: Georgia, serif;
+  font-size: 1.45rem;
+}
+
+.moment small {
+  color: var(--ff-text-muted);
+  line-height: 1.35;
+}
+
+.momentReveal {
+  --moment-color: var(--ff-accent);
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  width: min(34rem, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.momentReveal[data-tone="discovery"],
+.momentReveal[data-tone="reward"] {
+  --moment-color: var(--ff-health);
+}
+
+.momentReveal[data-tone="setback"],
+.momentReveal[data-tone="danger"] {
+  --moment-color: var(--ff-danger);
+}
+
+.momentReveal[data-tone="route"] {
+  --moment-color: var(--ff-warning);
+}
+
+.momentReveal[data-tone="battle"] {
+  --moment-color: var(--ff-accent);
+}
+
+.momentType {
+  color: var(--moment-color);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  animation: detailIn 520ms 520ms ease-out both;
+}
+
+.momentStamp {
+  max-width: 100%;
+  padding: 0.45rem 1rem;
+  color: var(--moment-color);
+  font-family: Georgia, serif;
+  font-size: clamp(2.7rem, 13vw, 5.8rem);
+  font-weight: 1000;
+  letter-spacing: 0.05em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  border: 0.14em double currentColor;
+  opacity: 0.96;
+  transform: rotate(-4deg);
+  filter: drop-shadow(
+    0 0 1.6rem color-mix(in srgb, var(--moment-color) 38%, transparent)
+  );
+  animation: momentStampIn 720ms 140ms cubic-bezier(0.18, 0.89, 0.32, 1.28)
+    both;
+}
+
+.momentPrize {
+  max-width: 27rem;
+  margin: 0;
+  color: var(--ff-text);
+  font-size: clamp(1.1rem, 4vw, 1.55rem);
+  font-weight: 900;
+  line-height: 1.25;
+  animation: detailIn 520ms 700ms ease-out both;
+}
+
+.momentMath {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--moment-color) 35%, transparent);
+  color: var(--ff-text-muted);
+  background: color-mix(in srgb, var(--ff-bg-panel) 72%, transparent);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: detailIn 520ms 820ms ease-out both;
+}
+
+.momentOutcome {
+  max-width: 29rem;
+  margin: 0;
+  color: var(--ff-text-muted);
+  line-height: 1.55;
+  animation: detailIn 520ms 940ms ease-out both;
+}
+
+.momentReveal button {
+  min-width: 11rem;
+  animation: detailIn 520ms 1080ms ease-out both;
+}
+
 .verdict {
   display: grid;
   width: min(20rem, 100%);
@@ -275,6 +420,35 @@
   }
 }
 
+@keyframes momentStampIn {
+  from {
+    opacity: 0;
+    transform: scale(1.85) rotate(-13deg);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(0.96) rotate(-3deg);
+  }
+
+  to {
+    opacity: 0.96;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+@keyframes detailIn {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes settle {
   0% {
     opacity: 0.4;
@@ -302,6 +476,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .die,
+  .momentReveal > *,
   .settled,
   .overlay {
     animation: none;

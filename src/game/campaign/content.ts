@@ -105,6 +105,12 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Follow the drag marks',
           description: 'Descend from the road into the flooded ruins.',
           category: 'travel',
+          approach: 'risky',
+          successMoment: {
+            title: 'The Road Drops Away',
+            text: 'The party crosses the first threshold and cannot simply turn back.',
+            tone: 'route',
+          },
           successText:
             'The trail ends beneath a broken watchtower. The floor gives way, dropping the party into cold black water and rusted bars.',
           successEffects: [
@@ -131,18 +137,30 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Inspect the claw marks',
           description: 'Study the wall and learn what hunts beyond it.',
           category: 'inspect',
+          approach: 'clever',
           check: {
             stat: 'mind',
             dc: 11,
-            stakes: 'Success reveals a weakness. Failure closes this lead.',
+            stakes:
+              'Success reveals a battle weakness. Failure alerts the hunters and closes this lead.',
             matchingBackgrounds: ['scholar', 'wayfarer'],
             matchingTraits: ['curious'],
           },
           retryPolicy: 'closed',
+          successMoment: {
+            title: 'Weakness Revealed',
+            text: 'Ashfang defenses will be lower when battle begins.',
+            tone: 'discovery',
+          },
+          failureMoment: {
+            title: 'The Hunters Stir',
+            text: 'Something hears the scraping stone. The mire will be less forgiving.',
+            tone: 'danger',
+          },
           successText:
             'The marks belong to ashfangs. Their vision blurs in heavy smoke; the party can exploit that hesitation.',
           failureText:
-            'Water ruins the oldest marks. Whatever made them remains a mystery.',
+            'Water ruins the oldest marks. As you pull away, claws scrape somewhere beyond the wall.',
           successEffects: [
             { type: 'set-flag', flag: 'ashfang-weakness' },
             {
@@ -151,19 +169,32 @@ export const oldRoadCampaign: CampaignDefinition = {
               text: 'Ashfangs lose their bearings when the smoke grows dense.',
             },
           ],
+          failureEffects: [{ type: 'set-flag', flag: 'ashfang-alerted' }],
         },
         {
           id: 'call-through-wall',
           label: 'Call to the prisoner',
           description: 'A frightened voice answers from the next chamber.',
           category: 'talk',
+          approach: 'social',
           check: {
             stat: 'spirit',
             dc: 8,
-            stakes: 'Earn their trust and receive hidden supplies.',
+            stakes:
+              'Success earns hidden supplies. Failure closes this voice off for now.',
             matchingTraits: ['compassionate'],
           },
           retryPolicy: 'another-hero',
+          successMoment: {
+            title: 'Supplies Found',
+            text: 'A healing draught joins the acting fellow’s pack.',
+            tone: 'reward',
+          },
+          failureMoment: {
+            title: 'Trust Fractures',
+            text: 'The stranger falls silent. Another fellow may still find the right words.',
+            tone: 'setback',
+          },
           successText:
             'A hand reaches through a drainage gap and passes you a sealed healing draught.',
           failureText:
@@ -181,14 +212,26 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Study the drowned runes',
           description: 'Trace the magic beneath the water.',
           category: 'magic',
+          approach: 'magic',
           check: {
             stat: 'mind',
             dc: 11,
-            stakes: 'Success reveals a magical escape route.',
+            stakes:
+              'Success unlocks the safest escape. Failure means you need leverage before trying again.',
             matchingBackgrounds: ['scholar'],
             matchingTraits: ['curious'],
           },
           retryPolicy: 'after-advantage',
+          successMoment: {
+            title: 'Safer Route Opened',
+            text: 'The gate can be folded instead of forced.',
+            tone: 'route',
+          },
+          failureMoment: {
+            title: 'Pattern Resists',
+            text: 'The runes do not reject you, but they demand another clue.',
+            tone: 'setback',
+          },
           successText:
             'The runes are not a lock but a hinge. Their final symbol can fold the gate briefly out of the world.',
           failureText:
@@ -203,8 +246,14 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Fold the gate',
           description: 'Complete the rune and step through the iron.',
           category: 'magic',
+          approach: 'safe',
           hiddenUntilRevealed: true,
           requiredFlags: ['runes-understood'],
+          successMoment: {
+            title: 'Clean Escape',
+            text: 'No wounds. No noise. The road opens without protest.',
+            tone: 'route',
+          },
           successText:
             'The bars flatten into silver lines. The party steps through before the gaol remembers its shape.',
           successEffects: [
@@ -217,6 +266,7 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Work the drain lock',
           description: 'Reach through the flooded channel and pick the mechanism.',
           category: 'inspect',
+          approach: 'sneaky',
           check: {
             stat: 'finesse',
             dc: 11,
@@ -225,6 +275,16 @@ export const oldRoadCampaign: CampaignDefinition = {
             matchingTraits: ['cautious'],
           },
           retryPolicy: 'closed',
+          successMoment: {
+            title: 'Quiet Passage',
+            text: 'A narrow route opens without drawing the mire’s attention.',
+            tone: 'route',
+          },
+          failureMoment: {
+            title: 'Wounded',
+            text: 'The acting fellow loses health, but the campaign can continue.',
+            tone: 'setback',
+          },
           successText:
             'The mechanism clicks. A narrow reed-choked passage opens behind the gate.',
           failureText:
@@ -240,6 +300,7 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Break the chain',
           description: 'Force the gate before the water rises further.',
           category: 'force',
+          approach: 'force',
           check: {
             stat: 'might',
             dc: 14,
@@ -248,11 +309,24 @@ export const oldRoadCampaign: CampaignDefinition = {
             matchingTraits: ['bold'],
           },
           retryPolicy: 'another-hero',
+          successMoment: {
+            title: 'Brute Escape',
+            text: 'The gate breaks, but every creature nearby hears it.',
+            tone: 'route',
+          },
+          failureMoment: {
+            title: 'Iron Bites Back',
+            text: 'The acting fellow is injured. Another strong arm may still try.',
+            tone: 'setback',
+          },
           successText:
             'The chain tears free with a crack that rolls through the drowned halls.',
           failureText:
             'The chain holds. The recoil drives iron into your shoulder.',
-          successEffects: [{ type: 'open-map' }],
+          successEffects: [
+            { type: 'set-flag', flag: 'noisy-escape' },
+            { type: 'open-map' },
+          ],
           failureEffects: [{ type: 'adjust-health', amount: -4 }],
         },
         {
@@ -261,6 +335,12 @@ export const oldRoadCampaign: CampaignDefinition = {
           description:
             'Take the flooded crawlspace. It will hurt, but it cannot hold you.',
           category: 'travel',
+          approach: 'desperate',
+          successMoment: {
+            title: 'Bloodied Escape',
+            text: 'The party reaches open air, wounded but moving.',
+            tone: 'setback',
+          },
           successText:
             'The party crawls through broken stone and freezing runoff. You emerge bloodied beneath the open sky.',
           successEffects: [
@@ -283,6 +363,12 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Open the satchel',
           description: 'Take what the missing travelers could not carry.',
           category: 'inspect',
+          approach: 'safe',
+          successMoment: {
+            title: 'Cache Found',
+            text: 'An ember flask is added to the acting fellow’s pack.',
+            tone: 'reward',
+          },
           successText:
             'Inside rests an ember flask wrapped in oilcloth and a map marked with a warning: do not trust the smoke.',
           successEffects: [
@@ -306,6 +392,12 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Stand together',
           description: 'Enter battle with the party state you carried here.',
           category: 'combat',
+          approach: 'combat',
+          successMoment: {
+            title: 'Battle Joined',
+            text: 'Your exploration choices now shape the fight.',
+            tone: 'battle',
+          },
           successText: 'Steel clears leather. The mire answers.',
           successEffects: [
             { type: 'start-encounter', encounterId: 'smoke-in-the-mire' },
@@ -326,6 +418,12 @@ export const oldRoadCampaign: CampaignDefinition = {
           label: 'Make camp',
           description: 'Restore the party and claim the shrine’s reward.',
           category: 'travel',
+          approach: 'safe',
+          successMoment: {
+            title: 'Checkpoint Reached',
+            text: 'Rest, recover, and choose new strength before the road closes.',
+            tone: 'reward',
+          },
           successText:
             'The shrine accepts your offering. Old techniques return as if remembered from another life.',
           successEffects: [],

@@ -2,6 +2,7 @@ import { Button } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import type {
   ExplorationRoll,
+  OutcomeMoment,
   PartyMemberSnapshot,
   SceneActionDefinition,
 } from '../../game/campaign/types'
@@ -37,6 +38,7 @@ export function ExplorationRoller({
   const rollLabel = identityBonus > 0
     ? `${actor.stats[check.stat]} ${statLabels[check.stat]} + 2 identity`
     : `${actor.stats[check.stat]} ${statLabels[check.stat]}`
+  const moment = result?.success ? action.successMoment : action.failureMoment
   const [rollingValue, setRollingValue] = useState(1)
 
   useEffect(() => {
@@ -111,34 +113,81 @@ export function ExplorationRoller({
           </>
         ) : (
           <>
-            <div
-              className={styles.settled}
-              data-success={result?.success || undefined}
-              data-failure={!result?.success || undefined}
-            >
-              <img src="/assets/ui/d20.svg" alt="" />
-              <strong>{result?.die}</strong>
-            </div>
-            <div
-              className={styles.verdict}
-              data-success={result?.success || undefined}
-            >
-              <strong>{result?.success ? 'SUCCESS' : 'FAILURE'}</strong>
-              <span>
-                {result?.die} + {result?.statBonus}
-                {result?.identityBonus ? ` + ${result.identityBonus}` : ''} ={' '}
-                {result?.total} vs DC {result?.dc}
-              </span>
-            </div>
-            <p className={styles.outcome}>
-              {result?.success ? action.successText : action.failureText}
-            </p>
-            <Button color="brand" size="md" onClick={onContinue}>
-              Continue
-            </Button>
+            {moment ? (
+              <MomentReveal
+                formula={`${result?.die} + ${result?.statBonus}${
+                  result?.identityBonus ? ` + ${result.identityBonus}` : ''
+                } = ${result?.total} vs DC ${result?.dc}`}
+                moment={moment}
+                outcome={
+                  result?.success ? action.successText : action.failureText
+                }
+                success={Boolean(result?.success)}
+                onContinue={onContinue}
+              />
+            ) : (
+              <>
+                <div
+                  className={styles.settled}
+                  data-success={result?.success || undefined}
+                  data-failure={!result?.success || undefined}
+                >
+                  <img src="/assets/ui/d20.svg" alt="" />
+                  <strong>{result?.die}</strong>
+                </div>
+                <div
+                  className={styles.verdict}
+                  data-success={result?.success || undefined}
+                >
+                  <strong>{result?.success ? 'SUCCESS' : 'FAILURE'}</strong>
+                  <span>
+                    {result?.die} + {result?.statBonus}
+                    {result?.identityBonus
+                      ? ` + ${result.identityBonus}`
+                      : ''}{' '}
+                    = {result?.total} vs DC {result?.dc}
+                  </span>
+                </div>
+                <p className={styles.outcome}>
+                  {result?.success ? action.successText : action.failureText}
+                </p>
+                <Button color="brand" size="md" onClick={onContinue}>
+                  Continue
+                </Button>
+              </>
+            )}
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+function MomentReveal({
+  formula,
+  moment,
+  onContinue,
+  outcome,
+  success,
+}: {
+  formula: string
+  moment: OutcomeMoment
+  onContinue(): void
+  outcome?: string
+  success: boolean
+}) {
+  return (
+    <div className={styles.momentReveal} data-tone={moment.tone}>
+      <span className={styles.momentType}>
+        {success ? 'Success' : 'Setback'} · {moment.tone}
+      </span>
+      <div className={styles.momentStamp}>{moment.title}</div>
+      {moment.text && <p className={styles.momentPrize}>{moment.text}</p>}
+      <small className={styles.momentMath}>{formula}</small>
+      {outcome && <p className={styles.momentOutcome}>{outcome}</p>}
+      <Button color={success ? 'brand' : 'red'} size="md" onClick={onContinue}>
+        Continue
+      </Button>
     </div>
   )
 }
