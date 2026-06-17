@@ -1,4 +1,5 @@
 .creation { display:grid; gap:1.5rem; max-width:58rem; margin:0 auto; }
+.mobileStepper { display:none; }
 .panel { display:grid; gap:1.4rem; padding:clamp(1rem,4vw,2rem); border:1px solid var(--ff-border); background:var(--ff-bg-panel); }
 .heading span, .review > div > span { color:var(--ff-accent); font-size:.68rem; font-weight:900; letter-spacing:.15em; text-transform:uppercase; }
 .heading h1, .review h1 { margin:.25rem 0; font-family:Georgia,serif; font-size:clamp(2rem,6vw,3.2rem); }
@@ -35,6 +36,14 @@
 .reviewStats span, .reviewSkills span { padding:.55rem .8rem; border:1px solid var(--ff-border); background:var(--ff-surface); }
 .footer { display:flex; justify-content:space-between; padding-top:.5rem; border-top:1px solid var(--ff-border); }
 @media(max-width:42rem){
+  .desktopStepper { display:none; }
+  .mobileStepper { display:grid; gap:.55rem; padding:.85rem; border:1px solid var(--ff-border); background:linear-gradient(135deg,color-mix(in srgb,var(--ff-accent) 9%,transparent),transparent 55%),var(--ff-bg-panel); }
+  .mobileStepper > span { color:var(--ff-text-muted); font-size:.62rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; }
+  .mobileStepper > strong { font-family:Georgia,serif; font-size:1.55rem; }
+  .mobileStepper > div { display:grid; grid-template-columns:repeat(5,1fr); gap:.35rem; }
+  .mobileStepper button { height:.6rem; border:1px solid var(--ff-border); border-radius:999px; background:var(--ff-surface); }
+  .mobileStepper button[data-complete] { border-color:var(--ff-border-strong); background:color-mix(in srgb,var(--ff-accent) 35%,var(--ff-surface)); }
+  .mobileStepper button[data-active] { border-color:var(--ff-accent); background:var(--ff-accent); box-shadow:0 0 .8rem color-mix(in srgb,var(--ff-accent) 45%,transparent); }
   .choiceGrid,.skillGrid { grid-template-columns:1fr; }
   .statGrid { grid-template-columns:repeat(2,1fr); }
   .review { grid-template-columns:6rem 1fr; }

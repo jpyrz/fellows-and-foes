@@ -36,6 +36,7 @@ const traits: PersonalityTrait[] = [
   'curious',
 ]
 const statNames = Object.keys(statLabels) as StatName[]
+const stepLabels = ['Identity', 'Origin', 'Stats', 'Skills', 'Review']
 
 export function CharacterCreation() {
   const { createCharacter } = useGame()
@@ -98,13 +99,35 @@ export function CharacterCreation() {
   return (
     <GameShell title="Create Your Fellow">
       <div className={styles.creation}>
-        <Stepper active={step} color="brand" size="sm">
+        <Stepper
+          active={step}
+          className={styles.desktopStepper}
+          color="brand"
+          size="sm"
+        >
           <Stepper.Step label="Identity" />
           <Stepper.Step label="Origin" />
           <Stepper.Step label="Stats" />
           <Stepper.Step label="Skills" />
           <Stepper.Step label="Review" />
         </Stepper>
+        <div className={styles.mobileStepper} aria-label="Creation progress">
+          <span>
+            Step {step + 1} of {stepLabels.length}
+          </span>
+          <strong>{stepLabels[step]}</strong>
+          <div>
+            {stepLabels.map((label, index) => (
+              <button
+                key={label}
+                aria-label={`Go to ${label}`}
+                data-active={index === step || undefined}
+                data-complete={index < step || undefined}
+                onClick={() => setStep(index)}
+              />
+            ))}
+          </div>
+        </div>
 
         <section className={styles.panel} data-cy={`creation-step-${step}`}>
           {step === 0 && (
@@ -177,6 +200,8 @@ export function CharacterCreation() {
                 <h1>Assign 3, 2, 1, 1.</h1>
                 <p>
                   Stats are permanent and affect both exploration and combat.
+                  This alpha uses four compressed stats; the full rules pass
+                  should move closer to D&D-style ability scores.
                 </p>
               </div>
               <div className={styles.statGrid}>

@@ -1,15 +1,22 @@
 import { Button, Modal } from '@mantine/core'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { GameShell } from '../../components/GameShell/GameShell'
 import { useGame } from '../../game/campaign/gameContext'
 import { getCampaignDefinition } from '../../game/campaign/content'
+import {
+  calculateSuccessChance,
+  statLabels,
+} from '../../game/campaign/rules'
 import type {
   ExplorationRoll,
+  PartyMemberSnapshot,
   SceneActionDefinition,
 } from '../../game/campaign/types'
 import { ExplorationRoller } from './ExplorationRoller'
 import styles from './StoryScreen.module.scss'
+
+const STORY_ROLL_DURATION_MS = 850
 
 export function StoryScreen() {
   const { runId = '' } = useParams()
@@ -24,11 +31,15 @@ export function StoryScreen() {
   const [rollResult, setRollResult] = useState<
     ExplorationRoll | null | undefined
   >(undefined)
+  const [rollPhase, setRollPhase] = useState<'ready' | 'rolling' | 'result'>(
+    'ready',
+  )
   const [outcome, setOutcome] = useState<{
     action: SceneActionDefinition
     success: boolean
   } | null>(null)
   const [journalOpen, setJournalOpen] = useState(false)
+  const rollToken = useRef(0)
 
   if (!run || !campaign || !scene) return <Navigate to="/" replace />
   const activeRun = run
@@ -50,6 +61,21 @@ export function StoryScreen() {
     }
     return true
   })
+  const currentActor =
+    run.party.find((member) => member.id === actorId) ?? run.party[0]!
+  const canOpenMap = Object.values(campaign.scenes).some((campaignScene) =>
+    campaignScene.actions.some((action) => {
+      if (!activeRun.completedActionIds.includes(action.id)) return false
+      return [
+        ...action.successEffects,
+        ...(action.failureEffects ?? []),
+      ].some((effect) => effect.type === 'open-map')
+    }),
+  )
+  const hasUsableActions = visibleActions.some(
+    (action) =>
+      !activeRun.completedActionIds.includes(action.id) || action.repeatable,
+  )
 
   function perform(action: SceneActionDefinition) {
     if (action.id === 'rest-at-shrine') {
@@ -59,15 +85,24 @@ export function StoryScreen() {
     if (action.check) {
       setPendingAction(action)
       setRollResult(undefined)
+      setRollPhase('ready')
       return
     }
-    resolveSceneAction(activeRun.id, action, actorId)
+    resolveSceneAction(activeRun.id, action, currentActor.id)
     setOutcome({ action, success: true })
   }
 
   function roll() {
-    if (!pendingAction) return
-    setRollResult(resolveSceneAction(activeRun.id, pendingAction, actorId))
+    if (!pendingAction || rollPhase !== 'ready') return
+    setRollPhase('rolling')
+    const token = rollToken.current + 1
+    rollToken.current = token
+    const result = resolveSceneAction(activeRun.id, pendingAction, currentActor.id)
+    window.setTimeout(() => {
+      if (rollToken.current !== token) return
+      setRollResult(result)
+      setRollPhase('result')
+    }, STORY_ROLL_DURATION_MS)
   }
 
   function routeAfter(action: SceneActionDefinition, success: boolean) {
@@ -86,14 +121,26 @@ export function StoryScreen() {
       eyebrow={campaign.title}
       title={scene.chapter}
       actions={
-        <Button
-          size="compact-sm"
-          variant="subtle"
-          color="gray"
-          onClick={() => setJournalOpen(true)}
-        >
-          Journal
-        </Button>
+        <div className={styles.shellActions}>
+          {canOpenMap && (
+            <Button
+              size="compact-sm"
+              variant="subtle"
+              color="brand"
+              onClick={() => navigate(`/campaign/${activeRun.id}/map`)}
+            >
+              Map
+            </Button>
+          )}
+          <Button
+            size="compact-sm"
+            variant="subtle"
+            color="gray"
+            onClick={() => setJournalOpen(true)}
+          >
+            Journal
+          </Button>
+        </div>
       }
     >
       <div className={styles.story}>
@@ -118,7 +165,7 @@ export function StoryScreen() {
         </aside>
 
         <article className={styles.book}>
-          <div className={styles.art}>
+          <div className={styles.art} data-scene={scene.id}>
             <span>{scene.location}</span>
             <p>{scene.artworkTone}</p>
           </div>
@@ -146,13 +193,16 @@ export function StoryScreen() {
           <div>
             <span>Available actions</span>
             <strong>
-              {run.party.find((member) => member.id === actorId)?.name} leads
+              {currentActor.name} leads
             </strong>
           </div>
           <div className={styles.actionList}>
             {visibleActions.map((action) => {
               const completed =
                 run.completedActionIds.includes(action.id) && !action.repeatable
+              const checkContext = action.check
+                ? getActionCheckContext(action, currentActor, run.party)
+                : null
               return (
                 <button
                   key={action.id}
@@ -163,14 +213,40 @@ export function StoryScreen() {
                   <span>{action.category}</span>
                   <strong>{completed ? 'Completed' : action.label}</strong>
                   <p>{action.description}</p>
-                  {action.check && (
-                    <small>
-                      {action.check.stat} check · DC {action.check.dc}
-                    </small>
+                  {checkContext && (
+                    <div className={styles.checkHint}>
+                      <small>
+                        {statLabels[action.check!.stat]} DC {action.check!.dc} ·{' '}
+                        {checkContext.selectedChance}% with {currentActor.name}
+                      </small>
+                      <em>
+                        Best: {checkContext.bestActor.name}{' '}
+                        {checkContext.bestActor.id === currentActor.id
+                          ? '(selected)'
+                          : `(${checkContext.bestChance}%)`}
+                      </em>
+                      <span>{getRetryLabel(action.retryPolicy)}</span>
+                    </div>
                   )}
                 </button>
               )
             })}
+            {!hasUsableActions && (
+              <div className={styles.noActions}>
+                <strong>This page is resolved.</strong>
+                <span>
+                  Open the map to choose the next leg of the road, or read the
+                  journal before moving on.
+                </span>
+                <Button
+                  color="brand"
+                  disabled={!canOpenMap}
+                  onClick={() => navigate(`/campaign/${activeRun.id}/map`)}
+                >
+                  Open map
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       </div>
@@ -178,15 +254,22 @@ export function StoryScreen() {
       {pendingAction && (
         <ExplorationRoller
           action={pendingAction}
-          actor={run.party.find((member) => member.id === actorId)!}
+          actor={currentActor}
+          phase={rollPhase}
           result={rollResult}
-          onBack={() => setPendingAction(null)}
+          onBack={() => {
+            rollToken.current += 1
+            setPendingAction(null)
+            setRollPhase('ready')
+          }}
           onRoll={roll}
           onContinue={() => {
             const action = pendingAction
             const success = rollResult?.success ?? false
+            rollToken.current += 1
             setPendingAction(null)
             setRollResult(undefined)
+            setRollPhase('ready')
             routeAfter(action, success)
           }}
         />
@@ -241,4 +324,49 @@ export function StoryScreen() {
       </Modal>
     </GameShell>
   )
+}
+
+function getActionCheckContext(
+  action: SceneActionDefinition,
+  selectedActor: PartyMemberSnapshot,
+  party: PartyMemberSnapshot[],
+) {
+  const check = action.check!
+  const selectedBonus = getCheckBonus(action, selectedActor)
+  const bestActor = party
+    .map((member) => ({
+      member,
+      bonus: getCheckBonus(action, member),
+    }))
+    .toSorted((a, b) => b.bonus - a.bonus)[0].member
+
+  return {
+    bestActor,
+    bestChance: calculateSuccessChance(
+      getCheckBonus(action, bestActor),
+      check.dc,
+    ),
+    selectedChance: calculateSuccessChance(selectedBonus, check.dc),
+  }
+}
+
+function getCheckBonus(
+  action: SceneActionDefinition,
+  actor: PartyMemberSnapshot,
+) {
+  const check = action.check!
+  const identityBonus =
+    check.matchingBackgrounds?.includes(actor.background) ||
+    check.matchingTraits?.includes(actor.trait)
+      ? 2
+      : 0
+  return actor.stats[check.stat] + identityBonus
+}
+
+function getRetryLabel(retryPolicy: SceneActionDefinition['retryPolicy']) {
+  if (retryPolicy === 'closed') return 'Failure closes this lead'
+  if (retryPolicy === 'another-hero') return 'Another fellow may try'
+  if (retryPolicy === 'after-advantage') return 'Retry after finding leverage'
+  if (retryPolicy === 'changed') return 'Failure changes the path'
+  return 'Story outcome'
 }

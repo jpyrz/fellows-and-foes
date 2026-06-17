@@ -1,4 +1,5 @@
 import { Button } from '@mantine/core'
+import { useEffect, useState } from 'react'
 import type {
   ExplorationRoll,
   PartyMemberSnapshot,
@@ -10,6 +11,7 @@ import styles from './ExplorationRoller.module.scss'
 interface ExplorationRollerProps {
   action: SceneActionDefinition
   actor: PartyMemberSnapshot
+  phase: 'ready' | 'rolling' | 'result'
   result: ExplorationRoll | null | undefined
   onBack(): void
   onContinue(): void
@@ -22,6 +24,7 @@ export function ExplorationRoller({
   onBack,
   onContinue,
   onRoll,
+  phase,
   result,
 }: ExplorationRollerProps) {
   const check = action.check!
@@ -31,6 +34,20 @@ export function ExplorationRoller({
   const identityBonus = identityMatch ? 2 : 0
   const totalBonus = actor.stats[check.stat] + identityBonus
   const chance = calculateSuccessChance(totalBonus, check.dc)
+  const rollLabel = identityBonus > 0
+    ? `${actor.stats[check.stat]} ${statLabels[check.stat]} + 2 identity`
+    : `${actor.stats[check.stat]} ${statLabels[check.stat]}`
+  const [rollingValue, setRollingValue] = useState(1)
+
+  useEffect(() => {
+    if (phase !== 'rolling') return
+
+    const interval = window.setInterval(() => {
+      setRollingValue((current) => (current * 7 + 3) % 20 || 20)
+    }, 70)
+
+    return () => window.clearInterval(interval)
+  }, [phase])
 
   return (
     <div
@@ -39,46 +56,65 @@ export function ExplorationRoller({
       aria-modal="true"
       data-cy="exploration-roll"
     >
-      <div className={styles.content}>
-        <span className={styles.eyebrow}>
-          {result === undefined ? 'Action check' : 'Result'}
-        </span>
-        <h2>{action.label}</h2>
-        <p className={styles.actor}>
-          {actor.name} · {statLabels[check.stat]}
-        </p>
+      <div className={styles.content} data-phase={phase}>
+        <div className={styles.heading}>
+          <span className={styles.eyebrow}>
+            {phase === 'ready'
+              ? 'Ready to roll'
+              : phase === 'rolling'
+                ? 'Rolling'
+                : 'Result'}
+          </span>
+          <h2>{action.label}</h2>
+          <p className={styles.actor}>
+            <img src={actor.portrait} alt="" />
+            <span>
+              <strong>{actor.name}</strong>
+              <small>{statLabels[check.stat]} check</small>
+            </span>
+          </p>
+        </div>
 
-        {result === undefined ? (
+        {phase !== 'result' ? (
           <>
             <button
               className={styles.die}
               onClick={onRoll}
               aria-label="Roll exploration check"
+              data-rolling={phase === 'rolling' || undefined}
               data-cy="exploration-roll-trigger"
+              disabled={phase === 'rolling'}
             >
               <img src="/assets/ui/d20.svg" alt="" />
-              <strong>d20</strong>
+              <strong>{phase === 'rolling' ? rollingValue : 'd20'}</strong>
             </button>
+            <p className={styles.rollInstruction}>
+              {phase === 'ready' ? 'Tap the die to roll' : 'd20 in motion'}
+            </p>
             <div className={styles.formula}>
-              <span>Roll formula</span>
+              <span>Check preview</span>
               <strong>
-                d20 + {actor.stats[check.stat]} {statLabels[check.stat]}
-                {identityBonus > 0 ? ' + 2 identity' : ''}
+                Roll d20 + {rollLabel} against DC {check.dc}
               </strong>
               <small>
-                DC {check.dc} · {chance}% chance
+                {chance}% chance · {identityBonus > 0
+                  ? 'Background or trait applies'
+                  : 'No identity bonus'}
               </small>
             </div>
             <p className={styles.stakes}>{check.stakes}</p>
-            <Button variant="subtle" color="gray" onClick={onBack}>
-              Back
-            </Button>
+            {phase === 'ready' && (
+              <Button variant="subtle" color="gray" onClick={onBack}>
+                Back
+              </Button>
+            )}
           </>
         ) : (
           <>
             <div
               className={styles.settled}
               data-success={result?.success || undefined}
+              data-failure={!result?.success || undefined}
             >
               <img src="/assets/ui/d20.svg" alt="" />
               <strong>{result?.die}</strong>
